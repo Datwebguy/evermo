@@ -25,7 +25,7 @@ Scores are honest estimates out of 10: **now** (idea and plan only) and **target
 |-----------|-----|--------|---------------------|
 | User value & commercial potential | 5 | 7 | Real problems (platform lock-in, unverifiable tools and bills, no resale). Needs real agents people would actually buy. Revenue is clear but small until volume. |
 | Innovation | 6 | 8 | Agents as owned, resellable assets with on-chain rules, pinned tools and checkable bills is new. Risk: TapeAI and "Agent Firewall" sit nearby, so the difference must be obvious in the demo. |
-| Ecosystem integration (DeWEB, FabX, TapeCode, TapeKit, TapeSend) | 6 | 9 | Uses circuits, containers, DeWEB, HashPort, TapeKit, TapeSend and TAP-11/13/15/17/18 together. FabX and TapeCode are not used; the page says no specific tool is required. |
+| Ecosystem integration (DeWEB, FabX, TapeCode, TapeKit, TapeSend) | 6 | 9 | Uses circuits, containers, DeWEB (SiteRegistry), TapeKit, TapeSend and TAP-11/13/15/17 together. FabX and TapeCode are not used; the page says no specific tool is required. |
 | Product readiness & UX | 1 | 7 | Nothing built yet. Target: two working agents, buy → permission → alert → resell on X Layer, simple pages. |
 | Demo video (≤ 3 min) | 0 | 8 | One complete moment: buy an agent, receive a signed alert, check the bill, resell. |
 
