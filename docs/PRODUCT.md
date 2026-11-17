@@ -77,8 +77,8 @@ Evermo is the marketplace where agents are owned, verified and resold.
 
 ## Honest limits
 
-- Each agent needs its own circuit and container (container 0.08 OKB on X Layer). The maker pays this; it is part of the
-  agent's price.
+- Each agent needs its own circuit and container: about 0.082 OKB on X Layer (verified). The maker pays this; it is part
+  of the agent's price.
 - The AI runs off chain (the hackathon allows this). Ownership, rules, permissions, prices and receipts are on chain.
 - The first version ships agents that watch, check and report. Agents that move money come later, inside circuit limits.
 - The TapeOut standards used are drafts. Maker royalties apply to resales through Evermo; royalties on the official

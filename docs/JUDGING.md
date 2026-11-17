@@ -33,8 +33,8 @@ Scores are honest estimates out of 10: **now** (idea and plan only) and **target
 
 1. **Not shipping a working end-to-end flow.** Readiness and demo carry the most weight we can still change.
 2. **Looking like TapeAI or "Agent Firewall".** Lead with ownership and resale, and show it live.
-3. **Unconfirmed TapeOut details on X Layer:** wallets inside `tape://`, the official container opener flow, transistor
-   price, HashPort upload. `eval`, addresses and costs are verified in `VERIFICATION.md`.
+3. **TapeOut details on X Layer:** all tested on a local copy of mainnet (`VERIFICATION.md`); HashPort is BNB-only, so we
+   upload directly to SiteRegistry. Real transactions are the final confirmation.
 4. **Leftover code from other ideas.** Removed on 2026-11-17; keep the repo limited to Evermo.
 5. **Cost per agent** (container 0.08 OKB plus tape-out). Show that it is built into the agent's price.
 

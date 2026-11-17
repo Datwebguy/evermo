@@ -88,7 +88,7 @@ swapped. Anyone can check an agent's rules, tools and prices for free, without c
 - **Circuits on X Layer:** each agent is a circuit NFT; a shared rules circuit decides with `eval` whether each action is
   allowed.
 - **Circuit containers (ERC-6551):** hold each agent's site, inbox and budget; ownership moves with the circuit.
-- **DeWEB + HashPort + TapeKit:** the marketplace and every agent page are on-chain sites opened via `tape://`, verified
+- **DeWEB (SiteRegistry) + TapeKit:** the marketplace and every agent page are on-chain sites opened via `tape://`, verified
   byte by byte.
 - **TapeSend:** encrypted delivery of agent results and receipts to owners.
 - **TAP-11 / TAP-13:** service manifest, the owner's signed delegation (permission), and signed answers for every agent.

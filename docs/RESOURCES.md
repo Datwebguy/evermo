@@ -20,7 +20,9 @@
 - News and weekly digests: https://tapeout.link/news/ · https://tapeout.link/weekly
 - Protocol proposals (TAP-02, 10, 11, 13, 15, 17, 18 and more): https://github.com/TapeOutProtocol/TAPs
 - TapeKit (kernel, gateway, extension): https://github.com/TapeOutProtocol/TapeKit
-- Container on X Layer: 0.08 OKB. Uploads through HashPort: gas only.
+- Costs on X Layer (verified): 1 NAND ≈ 0.000661 OKB (processor #222), tape-out 0.0013 OKB, container 0.08 OKB.
+- Site uploads on X Layer: SiteRegistry `0xd6EFb7adCc9c83dC4924Ad56f6a8E4e969b9ADB6` directly (HashPort is BNB-only).
+- Gateway address for X Layer sites: `https://<id>-2-<processor>.tapekit.org/`.
 
 ## Judging tools
 

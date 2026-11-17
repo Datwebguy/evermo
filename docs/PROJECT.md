@@ -14,8 +14,8 @@ be bought, used, and resold, with every rule, tool and price checkable on chain.
 | Rules circuit | One shared circuit that decides if an agent action is allowed (see `CIRCUIT.md`) | TapeOut, X Layer |
 | Marketplace contract | List, buy with USDT0, resale with maker royalty, fee split | Solidity, X Layer |
 | Agent runtime | Off-chain service: checks the current owner on chain, checks the owner's signed delegation (TAP-11), calls the rules circuit, runs the agent, signs every answer with the circuit's inputs and result (TAP-13), writes AI usage receipts (TAP-17), delivers results | Node.js |
-| Inbox | Results and receipts delivered over TapeSend to the agent's own container, readable by its current holder; in-app inbox as fallback | TapeSend |
-| App | Marketplace, agent page (rules, tools, prices, history), My Agents, Inbox | DeWEB via HashPort, TapeKit |
+| Inbox | Results and receipts sent over TapeSend from Evermo's own service container to the agent's container, readable by its current holder (owner publishes a key once); in-app inbox as fallback | TapeSend |
+| App | Marketplace, agent page (rules, tools, prices, history), My Agents, Inbox | DeWEB (uploaded to SiteRegistry by our own script), opened via the TapeKit gateway |
 | Demo agents | "Position Watch" (lending health alerts on X Layer) and "Token Risk Check" (contract, liquidity and holder checks on X Layer) | Runtime |
 
 Not in the MVP: agents that move money, agent-to-agent hiring, more than two demo agents.
@@ -30,9 +30,8 @@ Not in the MVP: agents that move money, agent-to-agent hiring, more than two dem
 
 ## Build order
 
-1. Confirm on X Layer what `docs/VERIFICATION.md` still lists as open: wallet connection inside a `tape://` site, opening
-   containers through the official opener, processor and transistor price, HashPort upload. (`eval`, contract addresses
-   and costs are already verified there.)
+1. Done: every TapeOut step was tested on a local copy of X Layer (`docs/VERIFICATION.md`). First real step: create
+   Evermo's service circuit and container, and confirm with real transactions.
 2. Rules circuit: define, test every input, export for the canvas, tape out.
 3. Marketplace contract and tests.
 4. Agent runtime with TAP-11/13/15/17/18 and the two demo agents.
