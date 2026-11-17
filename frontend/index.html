@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evermo</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Evermo</h1>
+      <button id="connect">Connect wallet</button>
+    </header>
+    <main>
+      <p id="status" role="status"></p>
+
+      <section id="vault-picker">
+        <label for="vault">Vault</label>
+        <select id="vault"></select>
+      </section>
+
+      <section class="card" id="overview">
+        <h2>Your position</h2>
+        <dl>
+          <dt>Wallet balance</dt><dd id="wallet">–</dd>
+          <dt>Deposited (receipt)</dt><dd id="receipt">–</dd>
+          <dt>Pending yield</dt><dd id="pending">–</dd>
+          <dt>Claim rate (circuit)</dt><dd id="rate">–</dd>
+          <dt>Credits on claim</dt><dd id="credits-preview">–</dd>
+          <dt>Credit balance</dt><dd id="credit-balance">–</dd>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>Deposit</h2>
+        <input id="deposit-amount" type="number" min="0" step="any" placeholder="Amount" />
+        <button id="deposit">Approve &amp; deposit</button>
+      </section>
+
+      <section class="card">
+        <h2>Claim</h2>
+        <p class="hint">The vault asks the taped-out TapeOut circuit what you are allowed to claim.</p>
+        <button id="claim">Claim credits</button>
+      </section>
+
+      <section class="card">
+        <h2>Burn credits for TapeOut fees</h2>
+        <input id="burn-amount" type="number" min="0" step="any" placeholder="Credits" />
+        <select id="burn-action">
+          <option value="PROCESSOR_CREATE">Create processor</option>
+          <option value="TRANSISTOR_MINT">Mint transistors</option>
+          <option value="DEWEB_UPLOAD">DeWEB upload</option>
+        </select>
+        <button id="burn">Burn</button>
+      </section>
+
+      <section class="card">
+        <h2>Withdraw</h2>
+        <input id="withdraw-amount" type="number" min="0" step="any" placeholder="Amount" />
+        <button id="withdraw">Withdraw principal + yield</button>
+      </section>
+    </main>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
