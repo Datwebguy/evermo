@@ -3,6 +3,9 @@
 Reviewed on 2026-11-17 against the project notes, the TapeOut guide (tapeout.link) and the Aave X Layer
 market page. Nothing here has been changed in the code yet; it waits for a go-ahead.
 
+> **Update:** the decisions on these points are recorded in `docs/DESIGN.md` and the code changes in
+> `docs/CONTRACT_CHANGES.md`. This file is the original review.
+
 ## Facts checked
 
 | Topic | Finding |

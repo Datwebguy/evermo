@@ -1,3 +1,6 @@
+> **Superseded in part:** this describes the v1 circuit (6 inputs incl. eligibility, 362 gates). The planned v2 circuit
+> (no eligibility wire, at most about 40 gates, multiplier output) is in `docs/DESIGN.md`.
+
 # Evermo rule circuit — wire specification
 
 The circuit is combinational (NAND only, no LATCH). The reference rules live in
