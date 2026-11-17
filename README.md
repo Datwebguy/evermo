@@ -39,7 +39,4 @@ Idea and plan. Claims and their evidence: `docs/CLAIMS.md`.
 | `docs/AGENT_PROMPT.md` | Instructions for building agents working on this repo |
 | `docs/RESOURCES.md` | Links |
 
-> `contracts/`, `circuit/`, `frontend/`, `test/` and `scripts/` contain prototype code from an earlier idea and will be
-> replaced when the build starts.
-
 MIT licensed.

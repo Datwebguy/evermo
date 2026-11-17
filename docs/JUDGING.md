@@ -35,8 +35,7 @@ Scores are honest estimates out of 10: **now** (idea and plan only) and **target
 2. **Looking like TapeAI or "Agent Firewall".** Lead with ownership and resale, and show it live.
 3. **Unconfirmed TapeOut details on X Layer:** `eval` ABI, TapeSend hub, HashPort upload, and wallets inside `tape://`.
    Check these first.
-4. **Old prototype code in the repo.** `contracts/`, `circuit/`, `frontend/`, `test/` and `scripts/` are from an earlier idea
-   (a yield vault). AI and human judges reading the repo will see a different product. Remove before submitting.
+4. **Leftover code from other ideas.** Removed on 2026-11-17; keep the repo limited to Evermo.
 5. **Cost per agent** (container 0.08 OKB plus tape-out). Show that it is built into the agent's price.
 
 ## 4. How AI judges read projects (and how we prepare)
