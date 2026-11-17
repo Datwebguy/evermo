@@ -1,5 +1,5 @@
-> **Superseded in part:** this describes the v1 circuit (6 inputs incl. eligibility, 362 gates). The planned v2 circuit
-> (no eligibility wire, at most about 40 gates, multiplier output) is in `docs/DESIGN.md`.
+> **Superseded in part:** this describes the v1 circuit (6 inputs incl. eligibility, 362 gates). The planned v3 circuit
+> (5 inputs, allowed + fee tier, about 30 gates, BLIF for the canvas) is in `docs/DESIGN.md`.
 
 # Evermo rule circuit — wire specification
 

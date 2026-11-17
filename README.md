@@ -14,7 +14,7 @@ TapeOut protocol fees. The interface is hosted on DeWEB.
 | `frontend/` | Deposit / claim / burn / withdraw UI (Vite, ethers) built for a DeWEB container |
 | `test/` | Hardhat tests (vault runs against the real synthesized netlist) |
 | `scripts/deploy.ts` | Deployment for X Layer (chain ID 196) |
-| `docs/` | Product, project, circuit and resource notes, plus `REVIEW.md`, `DESIGN.md` (v2 plan), `CONTRACT_CHANGES.md` and `SUBMISSION.md` |
+| `docs/` | Product, project, circuit and resource notes, plus `REVIEW.md`, `DESIGN.md` (v3 plan), `CONTRACT_CHANGES.md` and `SUBMISSION.md` |
 
 ## How it works
 
@@ -38,8 +38,8 @@ npm run deploy -- --network xlayer
 
 ## Status and open items
 
-The code is v1. The v2 design and change list are in `docs/DESIGN.md` and `docs/CONTRACT_CHANGES.md`; implementation is
-on hold until approved.
+The code is a v1 prototype. The current plan is the simplified v3 in `docs/DESIGN.md`, with the code changes in
+`docs/CONTRACT_CHANGES.md`; implementation is on hold until approved.
 
 - Not yet taped out or deployed. Processor address and circuit ID are still needed.
 - Assumed `eval` ABI and the fee-sink settlement path need confirming against TapeOut

@@ -1,93 +1,118 @@
-# Evermo — design (v2, planned, not yet implemented)
+# Evermo — design v3 (simple version)
 
-Status: **plan only.** The code in `contracts/` still reflects v1. Nothing changes until the go-ahead is given.
-Decisions below are locked from external verification; see `docs/CONTRACT_CHANGES.md` for the code changes.
+Status: **plan only.** `contracts/` still holds the v1 prototype. Code changes wait for the go-ahead.
+This version replaces v2. It was simplified after reading the hackathon page and the TapeOut guide
+(tapeout.link: what-is, core concepts, first tapeout, DeWEB, HashPort, TapeKit, TapeCode, safety, quick reference).
 
 ## Pitch
 
-**Tape out for free: your yield pays your TapeOut fees.** Aimed at TapeOut builders. The claim rules live in a
-TapeOut circuit, so nobody, including the team, can change them later.
+**Tape out for free: your yield pays your TapeOut fees.**
+For TapeOut builders. Deposit USDT0, keep your principal, take your yield as BEM or OKB to pay TapeOut fees. The fee
+rules live in a TapeOut circuit, so nobody can ever change them.
 
-## Locked facts
+## What the user sees (three buttons)
 
-- Aave X Layer: WOKB 0% APY. USDT0 about 3.35% at about 85% utilization; USDC about 3.10% at about 82%. Large withdrawals can fail.
-- TapeOut fees (Nov 2026): processors created before Nov 8 still charge native OKB on X Layer. Processors created after
-  Nov 8 charge 0.1 BEM to create and 0.01 BEM per mint transaction. Tape-out and container fees are migrating to BEM but
-  are not fully switched; opening a container on X Layer was about 0.08 OKB.
-- BEM trades at about $9–10.
+1. **Deposit** USDT0. You get evUSDT0 1:1 (it's the receipt; you can hold or send it).
+2. **Claim** your yield as **BEM** (fees on new processors) or **OKB** (container fee and older processors).
+   The circuit sets your fee: the longer you've held, the lower it is.
+3. **Withdraw** your USDT0 any time, with any unclaimed yield paid in USDT0.
 
-## Scope
+That's the whole product.
 
-- Assets: **USDT0 and USDC only.** OKB/WOKB is dropped (no yield).
-- One vault per asset, one shared credit token, one reserve contract.
+## Why it's worth it (no outside money)
 
-## Credit model
+| You take your yield as | Evermo fee |
+|------------------------|-----------|
+| USDT0 (on withdraw) | 10% |
+| BEM or OKB (claim) | 8% → 6% → 4% → 2%, set by the circuit |
 
-- Credits are **USD-denominated**: 1 credit (18 decimals) = $1 of face value. Stablecoin yield is normalized at 1 USD per
-  unit, a documented assumption with a depeg circuit-breaker (claims pause if a stablecoin deviates beyond a set bound
-  per an on-chain price check). No "1 credit per asset unit" anywhere.
-- **Primary benefit: credits redeem for BEM.** `redeem(credits)` burns credits and pays BEM from the reserve at face value,
-  priced in USD per BEM. The user then pays TapeOut fees themselves. This works for any processor that charges BEM and
-  needs no TapeOut-side integration.
-- **Circuit multiplier.** The circuit outputs a bonus tier; credits minted = net yield (USD) x multiplier, where the
-  multiplier is 1.00x plus the tier bonus. The circuit decides who gets a better multiplier (longer holding time, bigger
-  position). The tier-to-bonus table is an immutable constant in the vault.
-- Legacy processors that still take native OKB: documented, not integrated. A user can sell redeemed BEM or use claimed
-  value for OKB; an optional later redeem-to-OKB path is possible if the reserve holds OKB.
+The discount is paid out of Evermo's own fee. Nothing needs funding.
 
-## Is the incentive real? (economics)
+Example: 1,000 USDT0 at about 3.35% earns about $33.50 a year. Taken as BEM at the lowest fee, that's about $32 of BEM
+after the swap, about 3.5 BEM at today's ~$9.20. That pays about 350 mint transactions at 0.01 BEM. Principal untouched.
 
-Redeeming at 1:1 face value is convenience (BEM on X Layer without trading or bridging), not surplus. Surplus requires a
-multiplier above 1.0x, and that has a cost:
+## Circuit rules (permanent)
 
-| Multiplier | Credits per $1.00 gross yield (after 10% performance fee) | Funded by |
-|-----------|--------------------------------|-----------|
-| 1.00x | $0.90 | self-funded, protocol keeps 10% |
-| 1.07x | $0.96 | self-funded ceiling, about 4% protocol revenue |
-| 1.20x | $1.08 | needs subsidy: about 8% of gross yield |
-| 1.50x | $1.35 | needs subsidy: about 35% of gross yield |
+Inputs (5 wires): weeks held, 0–7 (3 wires); position size category (2 wires: under $100, $100+, $1,000+, $10,000+).
 
-At $1M TVL and about 3.3% APY, gross yield is about $33k/yr, so subsidy is about $2.6k/yr at 1.20x and about $11.6k/yr at
-1.50x. **Decision:** the circuit's bonus is capped at the self-funded ceiling (about 1.07x). There is no subsidy and no outside
-funding. Credits can only be minted while the reserve coverage check passes.
+Outputs (3 wires): `allowed` and a 2-wire fee tier.
 
-## Reserve
+- `allowed` = held at least 1 week.
+- fee steps down one level for each of: held 2+ weeks, held 4+ weeks, position $1,000+.
+- Fee by tier: 8%, 6%, 4%, 2%.
 
-`EvermoReserve` (a contract) receives claimed yield and the performance fee. It holds stablecoins and BEM, pays redemptions,
-and enforces a coverage check: outstanding credit face value must not exceed reserve value. Claims that would break
-coverage revert. No EOA ever holds claimed yield.
+Built with the TapeOut canvas: we export a **BLIF** netlist (the canvas imports BLIF from Yosys/ABC), check it in the
+canvas simulator, then tape out on the **official TapeOut processor on X Layer** (the hackathon says we do not need our
+own processor). Target: about 30 NAND gates or fewer. The vault calls `eval` on it before every claim.
 
-Stablecoin to BEM conversion happens on a DEX or by manual purchase and bridge from BNB. BEM is bridged to X Layer 1:1
-via LayerZero and is mined only on BNB. **Open item: confirm a BEM pool with real liquidity on X Layer and decide the
-price source (TWAP vs. bounded multisig-set price).** This is the largest unverified dependency.
+## One circuit does three jobs
 
-## Circuit (plan)
+The same Evermo circuit NFT:
+1. **holds the rules** (`eval` before every claim),
+2. **hosts the app**: its container (ERC-6551) carries the DeWEB site at a `tape://` address,
+3. **collects revenue**: Evermo's fees are sent to that container address.
 
-- Remove the eligibility wire (see changes). Inputs: holding-time bucket (3 bits) and size category (2 bits) = 5 inputs.
-- Outputs: allowed (1) and bonus tier (2–3 bits).
-- Target at most about 40 NAND gates, produced by logic minimization and checked exhaustively on all 32 input rows.
-- Rule intent: allowed = held at least one bucket; bonus rises with holding time and size and saturates at the cap.
-- The exact bonus function is a pending decision; it must stay within the self-funded ceiling.
+Whoever holds the circuit NFT controls the container. That is the project owner, and it is stated openly.
 
-## Ownership model (planned)
+## Where the yield and BEM come from
 
-- Credit token: vaults registered at deployment, then ownership **renounced**. Nobody can add minters later.
-- Vault: circuit, processor, circuit ID, reserve address, bucket size, size tiers, fees caps are **immutable**.
-- Remaining parameters (fee rates within hard caps, BEM price source, reserve operations) are owned by a **timelock
-  (48h) controlled by a multisig (e.g. 3-of-5)**.
-- Claims and withdrawals can never be paused. An emergency guardian may pause new deposits only.
-- Final model is published in the README before deployment.
+- Yield: Aave V3 on X Layer, USDT0 market (largest market, about 3.35%).
+- BEM and OKB: swapped at claim time on Uniswap V3 on X Layer: USDT0 → WOKB (0.05% pool, about $145k) → BEM
+  (1% pool, about $42k). OKB is paid out by unwrapping WOKB.
+- BEM on X Layer is the LayerZero-bridged token `0x60e62efa9405d6873c5deabd4e6cc91c25363952` (8 decimals).
+- The user sets a minimum amount out (the app fills it from a live quote) so a claim can't be front-run at a bad price.
 
-## Fee path summary
+## No admin
 
-1. User claims: vault calls `eval`, mints USD-face credits at the circuit's multiplier.
-2. User redeems: credits burned, BEM paid from the reserve.
-3. User pays TapeOut fees in BEM (new processors) or OKB (legacy). Evermo does not call TapeOut fee functions in v2.
-4. Direct "credits pay the fee" integration is optional and only added once TapeOut's fee interface is confirmed.
+There is no owner. Fees, the circuit, the Aave market, the swap route and the fee address are fixed at deployment.
+Nobody can block a claim, pause withdrawals, change fees or move user funds. If something must change, a new vault is
+deployed and users choose whether to move.
 
-## Remaining open items
+## What was removed from earlier versions, and why
 
-1. BEM liquidity and price source on X Layer.
-2. Final bonus function within the self-funded cap.
-3. Confirmation of the `eval` ABI and the netlist import format.
-4. Aave X Layer pool and aToken addresses for USDT0 and USDC (pool address `0xE3F3Caefdd7180F884c01E57f65Df979Af84f116` was seen on a tracker page, not verified on-chain).
+| Removed | Why |
+|---------|-----|
+| Separate credit token | An extra token users must understand and redeem. Claiming straight to BEM/OKB does the same job in one step. |
+| Reserve contract, BEM price feed, redemption | Only needed because of credits. A live swap with a minimum-out replaces all three. |
+| Fee-sink integration with TapeOut | TapeOut fees are paid by the builder's own wallet. We just deliver BEM/OKB to that wallet. |
+| USDC and OKB vaults | One asset is simpler. WOKB earns 0% on Aave. |
+| Owner blocklist | Contradicted "permanent rules". |
+| Multisig and timelock | Nothing left to administer, so no admin at all is simpler and safer. |
+| Separate yield-source and receipt contracts | The vault itself is the receipt token and talks to Aave directly. |
+| Own processor | Not required by the hackathon; saves 0.1 BEM. |
+
+## Known limits (stated openly)
+
+- Aave USDT0 is about 85% utilized. A large withdrawal can fail until liquidity returns; the app shows how much can be
+  withdrawn right now.
+- BEM liquidity on X Layer is small (about $42k). Fine for claim-sized swaps; large claims get worse prices.
+- BEM price moves. Users receive BEM at the price when they claim.
+- Contracts are unaudited.
+
+## Hackathon rules check
+
+| Rule / criterion | How Evermo meets it |
+|------------------|---------------------|
+| Use TapeOut circuits, contracts or on-chain data on X Layer, or run on X Layer DeWEB | Circuit `eval` on X Layer, and the app on X Layer DeWEB |
+| Circuit projects: processor address + circuit ID | Submitted after tape-out (TBD now) |
+| Apps: access link + TapeOut features used | `tape://` link and https gateway link (tapekit.org); features listed |
+| Describe product, users, how to reach them, revenue, why users pay and stay | In `docs/SUBMISSION.md` |
+| Only work done during the event; no fabricated functionality | Built during the event; the post says what is built and what is planned |
+| Judging: user value, innovation, ecosystem integration, readiness/UX, demo video (≤3 min) | Real fee problem; one circuit doing three jobs; circuit + DeWEB + HashPort + TapeKit + BEM; three-button app; video planned |
+
+## Costs to launch (small, one-time)
+
+- Gas on X Layer for deployment (OKB).
+- Tape-out: about 30 NAND transistors bought from the official processor, plus the tape-out fee and gas.
+- Container: 0.08 OKB.
+- Site upload through HashPort: service fee 0, gas only.
+No processor creation fee and no subsidy.
+
+## Checks to do at build time
+
+1. Exact `eval` ABI on the X Layer processor and the BLIF/canvas import, by test-calling `eval` before tape-out.
+2. Wallet connection inside a DeWEB site (tape:// sites are sandboxed). If blocked, the hackathon allows the interface
+   to also run off-chain, so the same files are served from a normal https link too.
+3. Aave pool and USDT0 addresses on X Layer, read on-chain.
+4. Uniswap V3 router address on X Layer and the two pools above.
+5. Official TapeOut processor on X Layer and its NAND price.

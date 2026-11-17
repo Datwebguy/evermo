@@ -1,34 +1,48 @@
-# Planned contract and circuit changes (not implemented)
+# Planned code changes for design v3 (not implemented)
 
-Each item names the file, the change and the reason. Implementation waits for explicit approval.
+Implementation waits for an explicit go-ahead. Rationale for each removal is in `docs/DESIGN.md`.
 
-## Required by your decisions
+## Contracts
 
-| # | Where | Change | Why |
-|---|-------|--------|-----|
-| 1 | `EvermoVault.sol` | Delete `blocked`, `setBlocked`, `BlockedSet`; drop the eligibility input from `circuitInputs`, `_evaluate`, `previewClaim`. | Owner could deny any claim, contradicting permanent rules. |
-| 2 | `CircuitCodec.sol`, `circuit/rules.ts`, `circuit/synth.ts` | New wire layout: 5 inputs (bucket 3, size 2), outputs allowed + bonus tier. Tests updated. | Removes the eligibility wire; defines the multiplier output. |
-| 3 | `circuit/synth.ts` | Replace the sum-of-products generator with minimization (Quine-McCluskey/Espresso or ABC/Yosys) and shared logic; fail the build if gates exceed 40. | 362 gates is too expensive; the same rules fit in a few dozen. |
-| 4 | `EvermoVault.sol` | Replace `credits = yield * _scale * rate` with USD-face math: `yieldUsd = yield * 1e18 / 10**assetDecimals` (stablecoins only), `credits = yieldUsd * multiplierBps / 10_000`. Remove `_scale` size-normalization tied to asset units; size tiers become USD thresholds. | One credit must be worth the same regardless of source asset. |
-| 5 | new `EvermoReserve.sol` | Contract that receives claimed yield and fees, holds stablecoins and BEM, exposes `redeem` support and `coverage()`; vault sends yield here instead of `treasury`. | EOA must never hold claimed yield; enables redemption for BEM. |
-| 6 | `EvermoCredit.sol` | Replace `burnForFee`/`ITapeOutFeeSink` as the primary path with `redeem(amount)` (burn then reserve pays BEM). Keep fee-sink hook optional. Renounce ownership after vaults are registered. | BEM redemption is the locked incentive; removes admin minter control. |
-| 7 | `EvermoVault.sol` | `treasury` becomes an immutable `reserve`; remove `setTreasury`. Fee caps become constants; fee changes go through the timelock. | Protect the reserve; limit admin powers. |
-| 8 | `EvermoVault.sol` | Before minting, require `reserve.coverage()` stays at or above 100% after the mint. | Prevents minting credits that cannot be redeemed. |
-| 9 | new `PriceSource` interface + adapter | BEM/USD price for redemption (TWAP or bounded setter) with staleness and deviation bounds; stablecoin depeg check for claims. | USD-normalized credits need a BEM price; stablecoin assumption needs a breaker. |
-| 10 | deploy scripts, docs | Ownership via OpenZeppelin `TimelockController` (48h) owned by a multisig; document the final model. | Locked ownership decision. |
+| Action | File | Change |
+|--------|------|--------|
+| Rewrite | `contracts/EvermoVault.sol` | Single USDT0 vault that **is** the ERC-20 receipt (evUSDT0). Supplies to Aave V3 directly. Keeps per-share yield accounting and holding-time tracking. Adds `claim(Out out, uint256 minOut)` (BEM or OKB) and `maxWithdraw()` (Aave available liquidity). No owner. All settings immutable. |
+| Keep, update | `contracts/libraries/CircuitCodec.sol` | 5 input wires, 3 output wires (allowed + 2-bit fee tier); fee table 8/6/4/2% as constants. |
+| Keep | `contracts/interfaces/ITapeOutProcessor.sol` | Confirm ABI on X Layer before tape-out. |
+| Add | `contracts/interfaces/IAaveV3Pool.sol`, `ISwapRouter.sol`, `IWETH.sol` | Minimal interfaces for Aave, Uniswap V3 `exactInput`, WOKB unwrap. |
+| Delete | `contracts/tokens/EvermoCredit.sol`, `contracts/tokens/ReceiptToken.sol` | Credits removed; the vault is the receipt. |
+| Delete | `contracts/yield/AaveV3YieldSource.sol`, `contracts/interfaces/IYieldSource.sol`, `IEvermoVault.sol`, `ITapeOutFeeSink.sol` | Folded into the vault or no longer needed. |
+| Update | `contracts/mocks/*` | Add mock Aave pool, mock swap router, mock WOKB; keep `MockProcessor` (runs the real netlist). Remove `MockFeeSink`, `MockYieldSource`. |
 
-## Also recommended
+## Circuit
 
-| # | Where | Change | Why |
-|---|-------|--------|-----|
-| 11 | `EvermoVault.sol`, `AaveV3YieldSource.sol` | `maxWithdrawable()` reading Aave available liquidity; allow partial withdraw instead of reverting. | Aave utilization is 82–85%. |
-| 12 | `scripts/deploy.ts`, `frontend/` | Remove OKB/WOKB; add redeem screen and rate/multiplier card; show "verify against on-chain netlist". | Scope and UX match the new design. |
-| 13 | `contracts/interfaces/ITapeOutProcessor.sol` | Confirm the `eval` ABI against the deployed processor before tape-out. | Currently an assumption. |
-| 14 | tests | Add: reserve coverage invariant, redeem round-trip, multiplier cap, no-owner-block, timelock-only fee changes. | Cover the new behaviour. |
+| Action | File | Change |
+|--------|------|--------|
+| Rewrite | `circuit/rules.ts` | New rules: allowed = held ≥ 1 week; fee tier steps for 2+ weeks, 4+ weeks, $1,000+. |
+| Rewrite | `circuit/synth.ts` | Minimized two-level logic with shared terms; build fails above 30 gates. |
+| Add | `circuit/build.ts` output | Also write `evermo-rules.blif` for import into the TapeOut canvas, alongside the JSON used by tests. |
+| Keep | `circuit/circuit.test.ts` | Exhaustive check of all 32 input rows. |
+
+## Tests
+
+Deposit/receipt, yield follows transfers, no late-depositor capture, claim allowed only after 1 week, fee tier per circuit,
+claim to BEM and to OKB with min-out, withdraw with unclaimed yield at 10% fee, `maxWithdraw` when Aave is short, no owner
+functions exist.
+
+## Frontend
+
+Three screens in one page: Deposit, Claim (BEM or OKB, shows your fee tier and a live quote), Withdraw (shows max
+available now). One static bundle with no external links, so it qualifies for the "100% on-chain" mark. Uploaded through
+HashPort to the Evermo circuit's container; also served from an https link as a fallback.
+
+## Deploy scripts
+
+One script: deploy the vault with fixed addresses (Aave pool, USDT0, router, WOKB, BEM, processor, circuit ID, fee
+container). Nothing to configure afterwards.
 
 ## Order of work after approval
 
-1. Circuit (rules, minimizer, exhaustive tests).
-2. Reserve, credit, vault changes with tests.
-3. Price source and redemption.
-4. Deploy scripts, frontend, ownership setup.
+1. Circuit: rules, BLIF, canvas check, `eval` test-call on X Layer.
+2. Vault and tests.
+3. Frontend and HashPort upload.
+4. Tape-out, container, deploy, demo video.
