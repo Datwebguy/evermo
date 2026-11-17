@@ -1,6 +1,7 @@
 # Evermo — submission form text (ready to paste)
 
 Form: https://forms.gle/EoDNbxQ65dev1wFd9 · Deadline: 7 December 2026, 23:59 UTC. Fields marked TBD are filled after deployment.
+Matches the X post in `docs/POST.md`.
 
 ## Project name
 
@@ -8,52 +9,71 @@ Evermo
 
 ## One-line description
 
-A marketplace where people buy, use and resell AI agents they actually own, with every agent's rules, tools and prices
-checkable on chain and impossible to quietly change.
-
-## Product
-
-Evermo turns AI agents into things people own. Each agent is a TapeOut circuit on X Layer with its own container
-(ERC-6551), so whoever holds the circuit owns the agent, its setup, its inbox and its budget.
-
-How it works:
-1. Browse agents on Evermo's DeWEB site. Each agent page shows its rules (a circuit anyone can read), its tools (pinned
-   on chain), its price list (on chain) and its history.
-2. Buy an agent with USDT0. The agent's circuit NFT moves to your wallet.
-3. Sign one permission saying what the agent may do and until when.
-4. The agent works on its own and sends results to your TapeSend inbox. Every answer is signed and every AI charge has a
-   receipt you can check against the on-chain price list.
-5. Sell or hand over the agent at any time. The old owner's permission stops working.
+An app store for AI agents on X Layer, except you own what you buy, you can check everything it does, and you can resell
+it when you're done.
 
 ## Problem it solves
 
-Today an AI agent lives on someone else's platform: it disappears if the platform changes, its tool instructions can be
-quietly changed, its bill cannot be checked, nothing outside the agent enforces your limits, and a well-configured agent
-cannot be sold or handed over. Makers cannot sell agents as products people own; they rent access through platforms that
-take a cut.
+People who want an AI agent today are stuck between two bad options:
+- Build their own: servers, keys, maintenance, and no way to prove what it does.
+- Rent one from a platform: it lives in the platform's account, under the platform's rules, and disappears with it. Its
+  tools can be quietly changed, its bill can't be checked, and a well-configured agent can't be sold or handed to a
+  teammate.
+
+Makers have the same problem from the other side: a great agent can't be sold as a product, only rented out through a
+platform that takes a cut and owns the customers.
+
+## Product
+
+Evermo is a marketplace on X Layer where AI agents are things people own.
+
+- **Every agent is a circuit.** Each agent is a TapeOut circuit NFT with its own ERC-6551 container holding its site,
+  inbox and budget. Whoever holds the NFT owns the agent.
+- **Its tools are pinned on chain.** Every agent publishes a manifest at `/.well-known/tapeapi.json` on its DeWEB site
+  (TAP-11), with a hash of its exact tool descriptions (TAP-15). If anyone quietly changes what the agent is told to do,
+  the hash stops matching and the change is refused.
+- **Its rules are a circuit.** Before an agent acts, Evermo calls `eval` on a rules circuit: is the owner's permission
+  valid, is this protocol allowed, is the amount over the limit. Once taped out, nobody can change those rules.
+- **Its bill is checkable.** Prices sit in the agent's on-chain manifest. Every answer comes back signed (TAP-13) with a
+  usage receipt (TAP-17): what was asked, which model answered, what it cost.
+- **Permission, not keys.** The owner signs one record (TAP-18): what the agent may do and until when. It can be cancelled
+  any time.
+- **Results in your inbox.** Alerts and reports arrive encrypted over TapeSend, straight to the owner's container.
+- **Resell when you're done.** When an agent is sold on Evermo, the old owner's permission stops working and the new
+  owner's begins. The maker earns a royalty on every resale through Evermo.
+
+The marketplace lives on DeWEB (`tape://`), checked byte by byte by TapeKit, so even the page users buy from can't be
+swapped. Anyone can check an agent's rules, tools and prices for free, without connecting a wallet.
 
 ## Target users and how we reach them
 
-- **Agent makers** (developers, traders, quants, researchers): TapeOut and X Layer builder communities, r/tapeout, TapeTape,
-  AI agent developer communities. Makers bring their own followers to buy their agents.
-- **Agent owners** (traders, DeFi users, researchers, small teams and DAOs): through makers' audiences, X Layer and OKX
-  Wallet communities, and agent pages anyone can open and share without a wallet.
-- **Second-hand buyers:** the resale listings.
+- **Makers:** developers, traders, quants and researchers who built a useful agent and want to sell it as a product.
+  Reached through TapeOut and X Layer builder communities, r/tapeout, TapeTape and AI agent developer communities. Makers
+  bring their own audiences to buy their agents.
+- **Owners:** traders, DeFi users, researchers and small teams who want an agent working for them every day, under rules
+  they can read. Reached through makers' audiences, X Layer and OKX Wallet communities, and agent pages anyone can open
+  and share without a wallet.
+- **Second-hand buyers:** people who would rather buy an agent that's already set up and proven. Reached through resale
+  listings.
 
 ## Use cases
 
-- A DeFi user buys a "Position Watch" agent and gets signed alerts when their lending position gets risky.
-- A trader buys a "Token Risk Check" agent instead of spending hours checking each new token by hand.
-- A maker sells copies of their risk checker and earns on every sale and resale through Evermo.
-- A team shares one agent for weekly treasury reports and transfers it when the lead changes.
-- An owner who stops trading sells their configured agent instead of losing it.
+- **Not getting liquidated in your sleep:** someone with a lending position on X Layer buys a "Position Watch" agent.
+  When the health factor drops, a signed alert lands in their inbox. The rules circuit lets it watch, never move funds.
+- **Checking new tokens without losing hours:** a trader buys a "Token Risk Check" agent that reports on each new token's
+  contract, liquidity and holders in minutes, with tools that can't be secretly changed.
+- **Getting paid for a good agent:** the maker of that risk checker lists copies on Evermo and earns on every sale and
+  every resale.
+- **A team that changes people:** a small DAO shares one agent for weekly treasury reports. When the lead leaves, the
+  agent moves to the new lead with its setup intact.
+- **Getting value back:** someone who stops trading sells their configured agent instead of throwing the setup away.
 
 ## Why users pay and keep using it
 
-- Owners pay for an agent once and own it; they can resell it later, so buying is low-risk.
-- Agents run every day (alerts, reports, digests), so owners return daily.
+- Owners buy an agent once and own it; they can resell it later, so buying is low-risk.
+- Agents run every day (alerts, reports, digests), so owners come back daily.
 - Makers earn on every sale and resale, so they keep publishing better agents.
-- Rules, tools and prices are verifiable, which removes the main reasons people don't trust agents.
+- Rules, tools and bills are verifiable, which removes the main reasons people don't trust agents.
 
 ## Revenue model
 
@@ -63,15 +83,20 @@ take a cut.
 
 ## TapeOut features used
 
-- **Circuits on X Layer:** each agent is a circuit NFT; a shared rules circuit decides with `eval` whether each agent
-  action is allowed.
+- **Circuits on X Layer:** each agent is a circuit NFT; a shared rules circuit decides with `eval` whether each action is
+  allowed.
 - **Circuit containers (ERC-6551):** hold each agent's site, inbox and budget; ownership moves with the circuit.
-- **DeWEB + HashPort + TapeKit:** the marketplace and every agent page are on-chain sites opened via `tape://`.
-- **TapeSend:** private delivery of agent results and receipts to owners.
-- **TAP-11 / TAP-13:** each agent publishes a service manifest and signs every answer.
-- **TAP-15:** agent tool descriptions pinned on chain, so a quiet change is detected and refused.
-- **TAP-17:** on-chain AI price tables and signed usage receipts.
-- **TAP-18:** owners' signed permissions for their agents.
+- **DeWEB + HashPort + TapeKit:** the marketplace and every agent page are on-chain sites opened via `tape://`, verified
+  byte by byte.
+- **TapeSend:** encrypted delivery of agent results and receipts to owners.
+- **TAP-11 / TAP-13:** service manifest and signed answers for every agent.
+- **TAP-15:** tool descriptions pinned by hash; quiet changes are refused.
+- **TAP-17:** on-chain price tables and signed usage receipts.
+- **TAP-18:** owners' signed permissions.
+
+Together: circuits for rules nobody can change, containers for things you can own and transfer, TapeSend for private
+delivery, DeWEB for pages nobody can swap, and the TAP standards for signed answers, pinned tools and checkable bills.
+They turn an AI agent from something you rent into something you own.
 
 ## Circuit details
 

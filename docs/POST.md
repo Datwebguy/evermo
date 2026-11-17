@@ -10,16 +10,16 @@ imagine you spend weeks setting up an AI agent that watches your DeFi positions.
 
 then the platform changes its pricing. or shuts the agent down. or quietly updates one of its tools, and now the agent is being told to do something you never agreed to.
 
-you can't check what changed. you can't check what you were charged for. and when you stop needing it, all that setup is worth nothing. you can't sell it, you can't even hand it to a teammate.
+you can't check what changed or what you were charged for. and when you stop needing it, all that setup is worth nothing. you can't sell it or even hand it to a teammate.
 
 ---
 
 right now people who want an AI agent are stuck between two bad options:
 
--> build your own: servers, keys, maintenance, and no way to prove to anyone what it does
+-> build your own: servers, keys, maintenance, and no way to prove what it does
 -> rent one from a platform: it lives in their account, under their rules, and disappears with them
 
-makers have it just as bad. if you build a great agent, you can't sell it as a product. you rent access through a platform that takes a cut and owns your customers.
+makers have it just as bad. a great agent can't be sold as a product, only rented out through a platform that takes a cut and owns the customers.
 
 ---
 
@@ -32,43 +32,43 @@ an app store for AI agents on x layer, except you own what you buy, you can chec
 how evermo works on x layer tapeout
 
 -> every agent is a circuit
-each agent is a tapeout circuit NFT with its own ERC-6551 container. the container holds the agent's site, its inbox and its budget. whoever holds the NFT owns the agent. no account on our side, no "terms of service" switch.
+each agent is a tapeout circuit NFT with its own ERC-6551 container holding its site, inbox and budget. whoever holds the NFT owns the agent. no account on our side, no "terms of service" switch.
 
 -> its tools are pinned on chain
-every agent publishes a manifest at /.well-known/tapeapi.json on its DeWEB site (TAP-11), including a hash of its exact tool descriptions (TAP-15). if anyone quietly changes what the agent is told to do, the hash stops matching and the change is refused instead of trusted.
+every agent publishes a manifest at /.well-known/tapeapi.json on its DeWEB site (TAP-11), with a hash of its exact tool descriptions (TAP-15). if anyone quietly changes what the agent is told to do, the hash stops matching and the change is refused.
 
 -> its rules are a circuit
-before an agent acts, evermo calls eval on a rules circuit: is the owner's permission still valid, is this protocol allowed, is the amount over the limit. "only watch these three protocols." "never spend more than 50 USDT without asking me." once it's taped out, nobody can change those rules, including us.
+before an agent acts, evermo calls eval on a rules circuit: is the owner's permission valid, is this protocol allowed, is the amount over the limit. once it's taped out, nobody can change those rules, including us.
 
 -> its bill is checkable
-the agent's prices sit in its on-chain manifest. every answer comes back signed (TAP-13) with a usage receipt (TAP-17): what was asked, which model answered, what it cost. you can recompute every charge yourself.
+prices sit in the agent's on-chain manifest. every answer comes back signed (TAP-13) with a usage receipt (TAP-17): what was asked, which model answered, what it cost.
 
--> you give it permission, not your keys
+-> permission, not keys
 you sign one record (TAP-18): what the agent may do for you and until when. cancel it any time.
 
--> results land in your inbox
-alerts and reports are sent encrypted over TapeSend, straight to your container.
+-> results in your inbox
+alerts and reports arrive encrypted over TapeSend, straight to your container.
 
 -> resell when you're done
-list the agent on evermo. when someone buys it, the NFT moves, your permission stops working, and theirs begins. the maker earns a royalty on every resale through evermo.
+list the agent on evermo. when someone buys it, your permission stops working and theirs begins. the maker earns a royalty on every resale through evermo.
 
 ---
 
 why it can't be faked
 
-the rules are a taped-out circuit, so they can't be edited after the fact. the tools are pinned by hash, so they can't be swapped without everyone seeing. every answer and every charge is signed, so there's proof of who said what and what it cost. and the marketplace itself lives on DeWEB (tape://), checked byte by byte by TapeKit, so even the page you buy from can't be replaced.
+the rules are a taped-out circuit, the tools are pinned by hash, every answer and charge is signed, and the marketplace lives on DeWEB (tape://), checked byte by byte by TapeKit, so even the page you buy from can't be swapped.
 
-anyone can open an agent's page and check its rules, tools and prices for free, without connecting a wallet.
+anyone can check an agent's rules, tools and prices for free, without connecting a wallet.
 
 ---
 
 who uses evermo?
 
 -> makers
-developers, traders, quants and researchers who built an agent that's actually useful and want to sell it as a product, not rent it out through a platform.
+developers, traders, quants and researchers who built a useful agent and want to sell it as a product.
 
 -> owners
-traders, people with money in DeFi, researchers and small teams who want an agent working for them every day, under rules they can read.
+traders, DeFi users, researchers and small teams who want an agent working for them every day, under rules they can read.
 
 -> second-hand buyers
 people who'd rather buy an agent that's already set up and proven than build one from zero.
@@ -78,25 +78,25 @@ people who'd rather buy an agent that's already set up and proven than build one
 real use cases
 
 -> not getting liquidated in your sleep
-someone with a lending position on x layer buys a "position watch" agent and points it at their positions. when the health factor drops, a signed alert lands in their inbox. the agent can only watch, never move funds, because the rules circuit says so.
+someone with a lending position on x layer buys a "position watch" agent. when the health factor drops, a signed alert lands in their inbox. the rules circuit lets it watch, never move funds.
 
 -> checking new tokens without losing hours
-a trader who looks at new tokens every day buys a "token risk check" agent. it reports on the contract, liquidity and holders of each token in minutes, using tools that can't be secretly changed to do something else.
+a trader buys a "token risk check" agent that reports on each new token's contract, liquidity and holders in minutes, with tools that can't be secretly changed.
 
 -> getting paid for a good agent
-the maker of that risk checker lists copies on evermo. they earn on every sale and on every resale through evermo, and their name stays attached to the agent.
+the maker of that risk checker lists copies on evermo and earns on every sale and every resale.
 
 -> a team that changes people
-a small DAO shares one agent that prepares weekly treasury reports within set limits. when the lead leaves, the agent is transferred to the new lead with all its setup intact.
+a small DAO shares one agent for weekly treasury reports. when the lead leaves, the agent moves to the new lead with its setup intact.
 
 -> getting value back
-someone who stops trading after six months lists their configured agent and sells it, instead of throwing the setup away.
+someone who stops trading sells their configured agent instead of throwing the setup away.
 
 ---
 
-we have circuits for rules nobody can change, containers for things you can own and transfer, TapeSend for private delivery, DeWEB for pages nobody can swap, and the TAP standards for signed answers, pinned tools and checkable bills.
+circuits for rules nobody can change, containers for things you can own and transfer, TapeSend for private delivery, DeWEB for pages nobody can swap, and the TAP standards for signed answers, pinned tools and checkable bills.
 
-putting them together turns an AI agent from something you rent into something you own.
+put them together and an AI agent stops being something you rent and becomes something you own.
 
 ---
 
