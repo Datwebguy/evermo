@@ -48,9 +48,8 @@ multiplier above 1.0x, and that has a cost:
 | 1.50x | $1.35 | needs subsidy: about 35% of gross yield |
 
 At $1M TVL and about 3.3% APY, gross yield is about $33k/yr, so subsidy is about $2.6k/yr at 1.20x and about $11.6k/yr at
-1.50x. **Proposal:** the circuit's bonus range is capped at the self-funded ceiling (about 1.07x). Any higher multiplier
-(1.2–1.5x) is a time-limited, treasury- or grant-funded campaign, and credits can only be minted while the reserve
-coverage check passes. This keeps the documented 1.2–1.5x option available without making Evermo insolvent.
+1.50x. **Decision:** the circuit's bonus is capped at the self-funded ceiling (about 1.07x). There is no subsidy and no outside
+funding. Credits can only be minted while the reserve coverage check passes.
 
 ## Reserve
 
@@ -89,6 +88,6 @@ price source (TWAP vs. bounded multisig-set price).** This is the largest unveri
 ## Remaining open items
 
 1. BEM liquidity and price source on X Layer.
-2. Final bonus function and cap (and whether a subsidy campaign exists).
+2. Final bonus function within the self-funded cap.
 3. Confirmation of the `eval` ABI and the netlist import format.
 4. Aave X Layer pool and aToken addresses for USDT0 and USDC (pool address `0xE3F3Caefdd7180F884c01E57f65Df979Af84f116` was seen on a tracker page, not verified on-chain).
