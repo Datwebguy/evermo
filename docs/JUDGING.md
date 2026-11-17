@@ -9,8 +9,8 @@ Judges: the official X Layer and TapeOut teams, jointly.
 |-------------|--------|--------|
 | Build in the TapeOut ecosystem: use TapeOut circuits, contracts or on-chain data on X Layer, or run on X Layer DeWEB | Agents are circuits on X Layer; budget and resale circuits called with `eval` on chain; app on X Layer DeWEB | Planned |
 | Circuit projects: processor contract address + circuit ID | Budget circuit, resale circuit and agent circuits | TBD after tape-out |
-| Apps/tools: access link + which TapeOut features are used | `tape://` link + gateway link; features listed in `SUBMISSION.md` | TBD link |
-| Describe product, target users and how to reach them, revenue model, why users pay and keep using | `SUBMISSION.md` | Done |
+| Apps/tools: access link + which TapeOut features are used | `tape://` link + gateway link; features listed in the submission | TBD link |
+| Describe product, target users and how to reach them, revenue model, why users pay and keep using | the submission | Done |
 | Existing projects need substantial new work during the event | New project | OK |
 | Only work completed during the event is judged | All work in this repo is from the event | OK |
 | No plagiarism, fabricated functionality or fabricated data | Every claim must be backed in `CLAIMS.md` | Ongoing |

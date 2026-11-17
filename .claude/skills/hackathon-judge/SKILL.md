@@ -12,7 +12,7 @@ repository and the chain show. Never give credit for plans.
 
 1. `docs/JUDGING.md` (requirements, criteria, risks)
 2. `docs/CLAIMS.md` (claims to verify)
-3. `README.md`, `docs/SUBMISSION.md`, `docs/POST.md` (everything the team claims)
+3. `README.md` (everything the team claims)
 4. The code, tests and deployment records
 
 ## Steps
