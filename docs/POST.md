@@ -76,8 +76,8 @@ nobody can block your claim, pause withdrawals, or change fees. there's no admin
 an example
 
 1,000 USDT0 earns about $33 a year.
-stay 6 weeks and take it as BEM: about 3.4 BEM at today's price.
-that's about 340 mint transactions.
+stay 6 weeks and take it as BEM: your fee is 4%, so about 3.5 BEM at today's price.
+that's about 345 mint transactions.
 your 1,000 USDT0 is still there.
 
 ---

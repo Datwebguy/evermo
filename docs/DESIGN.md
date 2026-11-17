@@ -68,9 +68,9 @@ Why these numbers (placeholders until tape-out, then fixed forever):
   claiming BEM just to dump it does not pay.
 - The discount comes from Evermo's own fee; no outside money is needed.
 
-Example: 1,000 USDT0 at about 3.35% earns about $33.50 a year. Held 6+ weeks and taken as BEM, the fee is 6%, leaving
-about $31 of BEM after the swap: about 3.4 BEM at today's ~$9.20, enough for about 340 mint transactions. Principal
-untouched.
+Example: 1,000 USDT0 at about 3.35% earns about $33.50 a year. Held 6+ weeks, a $1,000+ position, taken as BEM: the fee
+is 10 − 3 − 1 − 2 = 4%, leaving about $31.80 of BEM after the swap: about 3.5 BEM at today's ~$9.20, enough for about 345
+mint transactions. Principal untouched.
 
 Revenue, honestly: at $1M deposited, yield is about $33k a year and Evermo earns about $1k–3.3k. It grows with deposits;
 it is not a big business at small scale.
