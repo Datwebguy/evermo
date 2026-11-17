@@ -23,9 +23,3 @@
 - Costs on X Layer (verified): 1 NAND ≈ 0.000661 OKB (processor #222), tape-out 0.0013 OKB, container 0.08 OKB.
 - Site uploads on X Layer: SiteRegistry `0xd6EFb7adCc9c83dC4924Ad56f6a8E4e969b9ADB6` directly (HashPort is BNB-only).
 - Gateway address for X Layer sites: `https://<id>-2-<processor>.tapekit.org/`.
-
-## Judging tools
-
-- Loops (AI judge, claim by claim with citations; not open source): https://www.loops.house/
-- NEAR hackathon guidance for AI judges (example of how AI judges read repos): https://nearhackathon.com/HACKATHON.md
-- HackRadar (open source, MIT): https://github.com/MJRaei/HackRadar

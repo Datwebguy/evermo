@@ -11,14 +11,16 @@ be bought, used, and resold, with every rule, tool and price checkable on chain.
 |------|--------------|-------|
 | Agent identity | Each agent is a circuit NFT on X Layer with its own container (ERC-6551) | TapeOut |
 | Agent manifest | `/.well-known/tapeapi.json` in the agent's DeWEB site: endpoints and signer (TAP-11), pinned tool digest `toolsSha256` (TAP-15), AI price table (TAP-17) | DeWEB |
-| Rules circuit | One shared circuit that decides if an agent action is allowed (see `CIRCUIT.md`) | TapeOut, X Layer |
-| Marketplace contract | List, buy with USDT0, resale with maker royalty, fee split | Solidity, X Layer |
+| Budget circuit | Decides whether a payment from an agent's budget is allowed (see `CIRCUIT.md`) | TapeOut, X Layer |
+| Resale circuit | Checks each sale and returns the royalty split (see `CIRCUIT.md`) | TapeOut, X Layer |
+| Budget contract | Holds each agent's budget; calls the budget circuit with `eval` on chain before any payment; owner can withdraw any time | Solidity, X Layer |
+| Marketplace contract | List, buy with USDT0, resale; calls the resale circuit on chain and splits each payment instantly between seller, maker and Evermo, holding no balance | Solidity, X Layer |
 | Agent runtime | Off-chain service: checks the current owner on chain, checks the owner's signed delegation (TAP-11), calls the rules circuit, runs the agent, signs every answer with the circuit's inputs and result (TAP-13), writes AI usage receipts (TAP-17), delivers results | Node.js |
 | Inbox | Results and receipts sent over TapeSend from Evermo's own service container to the agent's container, readable by its current holder (owner publishes a key once); in-app inbox as fallback | TapeSend |
 | App | Marketplace, agent page (rules, tools, prices, history), My Agents, Inbox | DeWEB (uploaded to SiteRegistry by our own script), opened via the TapeKit gateway |
 | Demo agents | "Position Watch" (lending health alerts on X Layer) and "Token Risk Check" (contract, liquidity and holder checks on X Layer) | Runtime |
 
-Not in the MVP: agents that move money, agent-to-agent hiring, more than two demo agents.
+Not in the MVP: agents paying arbitrary third parties, agent-to-agent hiring, more than two demo agents.
 
 ## User flows to demo
 

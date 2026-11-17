@@ -52,6 +52,11 @@ Makers:
 | A small team or DAO | Needs weekly treasury reports; members change | Shares one agent; it prepares reports within set limits | When the lead changes, the agent is transferred with all its setup |
 | An owner who no longer needs an agent | Stopped trading after six months | Lists the configured agent | Gets value back instead of losing the setup |
 
+## How Evermo grows TapeOut
+
+Every agent created is a circuit taped out (transistors burned), a container opened, a DeWEB site published and a steady
+flow of TapeSend messages. Every sale and every budget payment runs a TapeOut circuit on chain.
+
 ## Why people come back
 
 - Agents run every day: alerts, reports, digests.
@@ -69,18 +74,19 @@ All numbers are proposals until launch.
 ## What makes it different
 
 - Agents are products people own, not accounts on a platform.
+- Buy once, own it, sell it whenever you want; every sale is split instantly between seller, maker and Evermo.
+- An agent's budget can only pay for what its owner allowed, enforced on chain by a TapeOut circuit.
 - Rules, tools and prices are fixed on chain and checkable by anyone, without a wallet.
 - It puts TapeOut's service standards (TAP-10, 11, 13, 15, 17) to work together in one product.
 
-Related work in the ecosystem: TapeAI runs its own agents and token; an "Agent Firewall" idea proposes a rules layer.
-Evermo is the marketplace where agents are owned, verified and resold.
+Evermo is the marketplace where whole agents are owned, verified and resold.
 
 ## Honest limits
 
 - Each agent needs its own circuit and container: about 0.082 OKB on X Layer (verified). The maker pays this; it is part
   of the agent's price.
 - The AI runs off chain (the hackathon allows this). Ownership, rules, permissions, prices and receipts are on chain.
-- The first version ships agents that watch, check and report. Agents that move money come later, inside circuit limits.
+- In the first version, the only money an agent moves is its own budget (for AI usage and services), always through the
+  budget circuit.
 - The TapeOut standards used are drafts. Maker royalties apply to resales through Evermo; royalties on the official
   Circuit Market are not confirmed.
-- No audit yet.
