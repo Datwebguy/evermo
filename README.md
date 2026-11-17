@@ -14,7 +14,7 @@ TapeOut protocol fees. The interface is hosted on DeWEB.
 | `frontend/` | Deposit / claim / burn / withdraw UI (Vite, ethers) built for a DeWEB container |
 | `test/` | Hardhat tests (vault runs against the real synthesized netlist) |
 | `scripts/deploy.ts` | Deployment for X Layer (chain ID 196) |
-| `docs/` | Product, project, circuit and resource notes |
+| `docs/` | Product, project, circuit and resource notes, plus `REVIEW.md` and `SUBMISSION.md` |
 
 ## How it works
 
