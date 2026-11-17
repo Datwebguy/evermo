@@ -1,174 +1,135 @@
-# Evermo — design v4 (simple, balanced, sticky)
+# Evermo — rules that last forever
 
-Status: **plan only.** `contracts/` still holds the v1 prototype. Code changes wait for the go-ahead.
-This version replaces v2 and v3. It is based on the hackathon page and the TapeOut guide (tapeout.link: what-is, core
-concepts, first tapeout, DeWEB, HashPort, TapeKit, TapeCode, safety, quick reference), plus on-chain checks on X Layer.
+Status: **idea and plan.** No code for this version yet; the build starts on the go-ahead.
+Based on the hackathon page, the TapeOut guide (tapeout.link) and on-chain checks on X Layer.
 
-## Pitch
+## One line
 
-**Tape out for free: your yield pays your TapeOut fees.**
+Evermo turns any app rule into a permanent TapeOut circuit that anyone can check, and nobody can change.
 
-For TapeOut builders and the people who back them. Deposit USDT0, keep your principal, and send your yield as BEM, OKB or
-USDT0 to yourself, your project's circuit container, or a builder you support. The fee rules live in a TapeOut circuit,
-so nobody can ever change them.
+## The problem
 
-## What the user sees (three buttons, one setting)
+You join an airdrop, a loyalty program or a game on X Layer. The rules decide who gets what. But those rules sit in a
+contract with an admin key, or on a team's server. They can change after you have done the work, and you cannot easily
+check what they really are.
 
-1. **Deposit** USDT0. You get evUSDT0 1:1 (the receipt; you can hold or send it).
-2. **Claim** your yield as **BEM**, **OKB** or **USDT0**, sent to any address: your wallet, your project's circuit
-   container, or someone else's.
-3. **Withdraw** your USDT0 any time, with any unclaimed yield.
-4. **Back a builder** (optional setting): name one address that may collect your yield whenever they need it. Your
-   deposit stays yours, and you can change or remove the builder at any time.
+Projects have the opposite problem: they say "the rules are fair and final", and users have no reason to believe it.
 
-## Why users pick Evermo, and keep coming back
+## The solution
 
-| Reason | What it means for the user |
-|--------|----------------------------|
-| Yield arrives as TapeOut fuel | BEM for new processors and mints, OKB for containers and older processors. No swapping, no bridging. |
-| Fund your project directly | Send yield straight to your circuit's container, so your project pays its own fees. |
-| Back a builder at no cost | Supporters keep their deposit; the builder collects the yield. A no-loss way to support TapeOut builders. |
-| Loyalty that grows | Your fee drops every 2 weeks you stay. Leave, and you start from the top again. |
-| Rules nobody can change | The fee table is a taped-out circuit. No admin key exists. |
-| Frontend nobody can swap | The app lives on DeWEB and is checked byte-by-byte when opened. |
+A project writes its rule in plain terms. Evermo turns it into the smallest NAND circuit, the project tapes it out on
+TapeOut, and its contract asks the circuit for every decision with `eval`. Once taped out, the rule can never change, and
+anyone can check it for free without a wallet.
 
-**Growth loop:** builders bring their own supporters to Evermo, because supporters' yield pays the builder's fees. Every
-builder who joins is also a marketer.
+## How it works (five steps)
 
-## Compared with the alternatives (honest)
+1. **Describe the rule.** A simple form: name the inputs (yes/no, or a number in ranges) and say what the output is for
+   each case. Example: "weeks active 0–7, holds 10+ BEM yes/no → reward tier 0–3".
+2. **Build.** Evermo generates the smallest circuit it can, shows the gate count and the cost, and tests every possible
+   input against the description before anything touches the chain.
+3. **Tape out.** One click tapes it out on the Evermo processor on X Layer. Power users can instead import the BLIF file
+   into the TapeOut canvas.
+4. **Use.** The project gets a short code snippet: its contract passes the inputs and calls `eval(circuitId, inputs)`.
+5. **Verify.** Every rule gets a public page on DeWEB. Anyone can read the rule in plain words, try any input, and see the
+   answer straight from the on-chain circuit. No wallet, no account.
 
-| | Aave directly | Generic yield vault | Evermo |
-|--|--|--|--|
-| Highest raw yield | yes, no fee | often | no, Evermo takes 3–10% of yield |
-| Yield paid as BEM / OKB | no, swap yourself | no | yes |
-| Send yield to a container or a builder | no | no | yes |
-| Rules permanent and readable on TapeOut | no | no | yes |
-| Admin keys | Aave governance | usually | none |
-| Frontend on DeWEB | no | no | yes |
+## Who uses it
 
-Users who only want the highest yield will go elsewhere. Evermo is for people who build on TapeOut or back those who do;
-for them the convenience, the loyalty discount and builder support are the reasons to stay.
+- **Projects (rule makers):** airdrops, loyalty programs, games, DAOs, any app on X Layer that wants provably fair rules.
+- **Their users (rule checkers):** open the rule page and check what they will get, before and after.
+- **Developers:** add a permanent rule to a contract with one call.
 
-## Fees (set by the circuit, the same for every payout option)
+## Use cases
 
-| | Fee on yield |
-|--|--|
-| Starting fee | 10% |
-| Every 2 weeks held | −1%, up to −3% (6+ weeks) |
-| Position $1,000+ / $10,000+ | −1% / −2% |
-| Paid out in BEM | −2% |
-| **Lowest possible** | **3%** |
+- **Airdrop eligibility:** "active 4+ weeks and made 10+ transactions → eligible, tier by activity". Published before the
+  campaign starts, so it cannot be changed after people farm it.
+- **Fee or discount tiers:** "holding time and position size → fee %".
+- **Loyalty levels:** "months active and spend bucket → level".
+- **Game rules:** "card A vs card B → winner", "roll and stats → outcome".
+- **Voting thresholds:** "turnout bucket and yes-share bucket → passed or not".
 
-Withdrawals never depend on the circuit: principal plus unclaimed yield always comes back at the 10% starting fee.
+## Why it is different
 
-Why these numbers (placeholders until tape-out, then fixed forever):
-- Yield vaults commonly take roughly 10–20% of yield, so 10% sits at the low end.
-- The same schedule applies to USDT0, OKB and BEM, so there is no cheap route to cash out.
-- The BEM discount (2%) is no bigger than the cost of swapping BEM back out (about 2% in pool fees plus slippage), so
-  claiming BEM just to dump it does not pay.
-- The discount comes from Evermo's own fee; no outside money is needed.
+- **The circuit is the product.** Other tools put rules in contracts that admins can upgrade. Evermo rules are taped-out
+  logic: no admin, no upgrade, ever.
+- **No hardware skills needed.** Projects describe a rule; Evermo does the logic design.
+- **Anyone can check, for free.** `eval` is a free read, so the rule page works without a wallet.
+- **Nothing to trust about Evermo either.** The app runs on DeWEB and is checked byte-by-byte when opened. Evermo never
+  holds user funds.
 
-Example: 1,000 USDT0 at about 3.35% earns about $33.50 a year. Held 6+ weeks, a $1,000+ position, taken as BEM: the fee
-is 10 − 3 − 1 − 2 = 4%, leaving about $31.80 of BEM after the swap: about 3.5 BEM at today's ~$9.20, enough for about 345
-mint transactions. Principal untouched.
+## What a rule can and cannot do (stated openly)
 
-Revenue, honestly: at $1M deposited, yield is about $33k a year and Evermo earns about $1k–3.3k. It grows with deposits;
-it is not a big business at small scale.
+- The circuit fixes the logic. The project's contract supplies the inputs (balances, times, counts). A project that wants
+  the full guarantee must also lock its contract to the circuit ID; the rule page shows the circuit, and we say this
+  clearly.
+- Rules must be small: a handful of inputs, not lists of thousands of addresses. Netlists above about 40 KB cannot be
+  taped out in one go.
+- A wrong rule is wrong forever. That is why Evermo tests every input before tape-out and shows the result in plain words.
 
-## Circuit rules (permanent)
+## Revenue
 
-Inputs (6 wires): weeks held 0–7 (3 wires), size category (2 wires: under $1,000, $1,000+, $10,000+), paid in BEM (1 wire).
+Evermo opens its own processor on X Layer. On TapeOut, the processor creator sets a transistor price and earns a share
+whenever anyone mints transistors on it. Every rule taped out through Evermo uses Evermo transistors, so Evermo earns per
+gate, using TapeOut's own economics. No subscriptions, no token sale, no outside money.
 
-Output (4 wires): the fee in whole percent (3–10).
+Why projects pay and come back:
+- A rule costs only a few dozen transistors.
+- Rules are permanent, so every new campaign, season or game needs a new rule: repeat tape-outs are built in.
+- Users trust projects that publish Evermo rules, which is what projects want.
 
-`fee = 10 − min(3, weeks / 2) − size − (BEM ? 2 : 0)`
+Running costs are close to zero: no servers (the app is on DeWEB) and nothing to administer.
 
-The circuit returns the fee itself, so anyone reading it on-chain sees the exact fee table. No fee numbers live in the
-vault code, except the fixed 10% on withdrawals.
+Honest risk: a project could take the BLIF file and tape out on another processor, skipping our share. The one-click
+flow uses the Evermo processor by default.
 
-Built with the TapeOut canvas: we export a **BLIF** netlist (the canvas imports BLIF from Yosys/ABC), check it in the
-canvas simulator, then tape out on the **official TapeOut processor on X Layer** (the hackathon says we do not need our
-own processor). Target: about 40 NAND gates or fewer. The vault calls `eval` on it before every claim.
+## TapeOut features used
 
-## One circuit does three jobs
-
-The same Evermo circuit NFT:
-1. **holds the fee rules** (`eval` before every claim),
-2. **hosts the app**: its container (ERC-6551) carries the DeWEB site at a `tape://` address,
-3. **collects revenue**: Evermo's fees are sent to that container address.
-
-Whoever holds the circuit NFT controls the container. That is the project owner, and it is stated openly.
-
-## Where the yield and BEM come from
-
-- Yield: Aave V3 on X Layer, USDT0 market (largest market, about 3.35%).
-- BEM and OKB: swapped at claim time on Uniswap V3 on X Layer: USDT0 → WOKB (0.05% pool, about $145k) → BEM (1% pool,
-  about $42k). OKB is paid out by unwrapping WOKB. USDT0 payouts need no swap.
-- BEM on X Layer is the LayerZero-bridged token `0x60e62efa9405d6873c5deabd4e6cc91c25363952` (8 decimals).
-- The user sets a minimum amount out (the app fills it from a live quote) so a claim cannot be front-run at a bad price.
-
-## No admin
-
-There is no owner. The circuit, the Aave market, the swap route and the fee address are fixed at deployment. Nobody can
-block a claim, pause withdrawals, change fees or move user funds. A backed builder can only collect yield, never
-principal, and only until the depositor removes them. If something must change, a new vault is deployed and users choose
-whether to move.
-
-## What was removed from earlier versions, and why
-
-| Removed | Why |
-|---------|-----|
-| Separate credit token | An extra token users must understand and redeem. Claiming straight to BEM/OKB does the same job in one step. |
-| Reserve contract, BEM price feed, redemption | Only needed because of credits. A live swap with a minimum-out replaces all three. |
-| Fee-sink integration with TapeOut | TapeOut fees are paid by the builder's own wallet. We deliver BEM/OKB to that wallet or container. |
-| Different fee for cash vs. BEM/OKB | It let users claim OKB and sell it to dodge the cash fee. One schedule closes that. |
-| USDC and OKB vaults | One asset is simpler. WOKB earns 0% on Aave. |
-| Owner blocklist | Contradicted "permanent rules". |
-| Multisig and timelock | Nothing left to administer, so no admin at all is simpler and safer. |
-| Separate yield-source and receipt contracts | The vault itself is the receipt token and talks to Aave directly. |
-| Own processor | Not required by the hackathon; saves 0.1 BEM. |
-
-## Known limits (stated openly)
-
-- Evermo takes 3–10% of yield, so raw yield is lower than using Aave directly.
-- Aave USDT0 is about 85% utilized. A large withdrawal can fail until liquidity returns; the app shows how much can be
-  withdrawn right now.
-- BEM liquidity on X Layer is small (about $42k). Fine for claim-sized swaps; large claims get worse prices.
-- BEM price moves. Users receive BEM at the price when they claim.
-- Moving evUSDT0 to another wallet resets its loyalty age, so loyalty cannot be bought.
-- Contracts are unaudited.
-
-## Later, not now (kept out to stay simple)
-
-- TapeSend message to your container when yield is ready (the TAP-10 spec is being rewritten).
-- Automatic scheduled claims (needs a bot and gas).
-- More deposit assets.
+| Feature | How Evermo uses it |
+|---------|-------------------|
+| NAND circuits + `eval` on X Layer | Every rule is a taped-out circuit; contracts call `eval` |
+| Processor factory | Evermo's own processor, earning a share of transistor mints |
+| Canvas (BLIF import) | Power users can open and inspect any rule in the canvas |
+| Circuit containers (ERC-6551) | The Evermo app's container hosts the site and receives revenue |
+| DeWEB + HashPort | The app and every rule page are static files on chain, opened via `tape://` |
+| TapeKit | Pages are verified byte-by-byte; the tapekit.org gateway opens them in any browser |
+| BEM | Pays processor creation (0.1 BEM) and mints (0.01 BEM per transaction) on new processors |
 
 ## Hackathon rules check
 
 | Rule / criterion | How Evermo meets it |
 |------------------|---------------------|
-| Use TapeOut circuits, contracts or on-chain data on X Layer, or run on X Layer DeWEB | Circuit `eval` on X Layer, and the app on X Layer DeWEB |
-| Circuit projects: processor address + circuit ID | Submitted after tape-out (TBD now) |
-| Apps: access link + TapeOut features used | `tape://` link and https gateway link (tapekit.org); features listed |
-| Describe product, users, how to reach them, revenue, why users pay and stay | In `docs/SUBMISSION.md` |
-| Only work done during the event; no fabricated functionality | Built during the event; the post says what is built and what is planned |
-| Judging: user value, innovation, ecosystem integration, readiness/UX, demo video (≤3 min) | Real fee problem; yield to containers and builders; one circuit doing three jobs; circuit + containers + DeWEB + HashPort + TapeKit + BEM; simple app; video planned |
+| Use TapeOut circuits, contracts or on-chain data on X Layer, or run on X Layer DeWEB | Circuits and `eval` on X Layer; the app on X Layer DeWEB |
+| Circuit projects: processor address + circuit ID | Evermo processor address and the demo rule's circuit ID (TBD after tape-out) |
+| Apps: access link + TapeOut features used | `tape://` link and https gateway link; features listed above |
+| Product, users and how to reach them, revenue, why users pay and stay | Sections above and `docs/SUBMISSION.md` |
+| Only work during the event; no fabricated functionality | Built during the event; posts say clearly what is built and what is planned |
+| Judging: user value, innovation, ecosystem integration, readiness/UX, demo video (≤3 min) | Real trust problem; makes circuits usable by any project; processor + circuits + containers + DeWEB + HashPort + TapeKit + canvas; five-step app; video planned |
+
+## Demo for judges
+
+One real rule, end to end, on X Layer: an "Evermo early supporter" reward rule.
+1. Describe it in the form.
+2. Build: gate count, cost, all inputs tested.
+3. Tape out on the Evermo processor.
+4. A small demo contract calls `eval` and gives out a reward tier.
+5. Open the rule's DeWEB page with no wallet and check any input.
+
+## Build plan (after go-ahead)
+
+1. **Rule engine:** turn the existing circuit generator into a general one (any inputs and outputs), minimized, exhaustive
+   tests, BLIF and JSON output.
+2. **Checks on X Layer:** exact `eval` ABI, processor creation and transistor pricing, BLIF import into the canvas.
+3. **Evermo processor** on X Layer.
+4. **App:** describe → build → tape out → snippet; rule page with live `eval` and no wallet.
+5. **Demo contract** that calls `eval` for the reward rule.
+6. **DeWEB:** container and HashPort upload; https fallback if wallets cannot connect inside a `tape://` site.
+7. **Demo video** under three minutes.
+
+The v1 vault code in `contracts/` is removed when the build starts; its circuit generator is reused.
 
 ## Costs to launch (small, one-time)
 
-- Gas on X Layer for deployment (OKB).
-- Tape-out: about 40 NAND transistors bought from the official processor, plus the tape-out fee and gas.
+- Processor creation: 0.1 BEM (about $1).
+- Demo rule tape-out: a few dozen transistors plus the tape-out fee and gas.
 - Container: 0.08 OKB.
-- Site upload through HashPort: service fee 0, gas only.
-
-No processor creation fee and no subsidy.
-
-## Checks to do at build time
-
-1. Exact `eval` ABI on the X Layer processor and the BLIF/canvas import, by test-calling `eval` before tape-out.
-2. Wallet connection inside a DeWEB site (tape:// sites are sandboxed). If blocked, the hackathon allows the interface to
-   also run off-chain, so the same files are served from a normal https link too.
-3. Aave pool and USDT0 addresses on X Layer, read on-chain.
-4. Uniswap V3 router address on X Layer and the two pools above.
-5. Official TapeOut processor on X Layer and its NAND price.
+- Site upload through HashPort: no service fee, gas only.
