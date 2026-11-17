@@ -67,7 +67,7 @@ price source (TWAP vs. bounded multisig-set price).** This is the largest unveri
 - Outputs: allowed (1) and bonus tier (2–3 bits).
 - Target at most about 40 NAND gates, produced by logic minimization and checked exhaustively on all 32 input rows.
 - Rule intent: allowed = held at least one bucket; bonus rises with holding time and size and saturates at the cap.
-- The exact bonus function is a pending decision; it must stay within the self-funded ceiling unless a subsidy is approved.
+- The exact bonus function is a pending decision; it must stay within the self-funded ceiling.
 
 ## Ownership model (planned)
 
