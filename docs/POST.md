@@ -2,64 +2,108 @@
 
 ---
 
-you can rent an AI agent today. you can't own one. 🧵
+looking at what @TapeOutWorld has shipped on @XLayerOfficial, we already have every piece for something i really want to exist: AI agents you actually own. 🧵
 
-it lives on someone else's platform. its instructions can change without you knowing. you can't check its bill. and when you're done with it, all that setup is worth nothing.
+---
+
+imagine you spend weeks setting up an AI agent that watches your DeFi positions. you tune it, you trust it, you pay for it every month.
+
+then the platform changes its pricing. or shuts the agent down. or quietly updates one of its tools, and now the agent is being told to do something you never agreed to.
+
+you can't check what changed. you can't check what you were charged for. and when you stop needing it, all that setup is worth nothing. you can't sell it, you can't even hand it to a teammate.
+
+---
+
+right now people who want an AI agent are stuck between two bad options:
+
+-> build your own: servers, keys, maintenance, and no way to prove to anyone what it does
+-> rent one from a platform: it lives in their account, under their rules, and disappears with them
+
+makers have it just as bad. if you build a great agent, you can't sell it as a product. you rent access through a platform that takes a cut and owns your customers.
 
 ---
 
 my idea: evermo
 
-a marketplace on @XLayerOfficial and @TapeOutWorld where you buy, use and resell AI agents you actually own.
+an app store for AI agents on x layer, except you own what you buy, you can check everything it does, and you can resell it when you're done.
 
 ---
 
-how it works on x layer tapeout
+how evermo works on x layer tapeout
 
 -> every agent is a circuit
-each agent is a tapeout circuit NFT with its own container. hold the NFT, own the agent: its setup, its inbox, its budget.
+each agent is a tapeout circuit NFT with its own ERC-6551 container. the container holds the agent's site, its inbox and its budget. whoever holds the NFT owns the agent. no account on our side, no "terms of service" switch.
 
--> rules you can read
-a rules circuit checks every action before it runs. "only these protocols." "nothing over 50 USDT without asking me." taped out, so nobody can change it.
+-> its tools are pinned on chain
+every agent publishes a manifest at /.well-known/tapeapi.json on its DeWEB site (TAP-11), including a hash of its exact tool descriptions (TAP-15). if anyone quietly changes what the agent is told to do, the hash stops matching and the change is refused instead of trusted.
 
--> tools that can't be swapped
-the agent's tool descriptions are pinned on chain. if anyone quietly changes what the agent is told to do, it's detected and refused.
+-> its rules are a circuit
+before an agent acts, evermo calls eval on a rules circuit: is the owner's permission still valid, is this protocol allowed, is the amount over the limit. "only watch these three protocols." "never spend more than 50 USDT without asking me." once it's taped out, nobody can change those rules, including us.
 
--> bills you can check
-prices are listed on chain. every answer comes with a signed receipt: what was asked, what it cost.
+-> its bill is checkable
+the agent's prices sit in its on-chain manifest. every answer comes back signed (TAP-13) with a usage receipt (TAP-17): what was asked, which model answered, what it cost. you can recompute every charge yourself.
 
--> results in your inbox
-alerts and reports arrive encrypted through TapeSend, straight to your container.
+-> you give it permission, not your keys
+you sign one record (TAP-18): what the agent may do for you and until when. cancel it any time.
+
+-> results land in your inbox
+alerts and reports are sent encrypted over TapeSend, straight to your container.
 
 -> resell when you're done
-list your agent. a new owner buys it, your permission ends, theirs begins. the maker earns a royalty.
+list the agent on evermo. when someone buys it, the NFT moves, your permission stops working, and theirs begins. the maker earns a royalty on every resale through evermo.
 
 ---
 
-who it's for
+why it can't be faked
 
--> makers: developers, traders and researchers who built a useful agent and want to sell it as a product
--> owners: traders, DeFi users, researchers and small teams who want an agent working for them every day
--> buyers who'd rather get a proven, ready-made agent than build one
+the rules are a taped-out circuit, so they can't be edited after the fact. the tools are pinned by hash, so they can't be swapped without everyone seeing. every answer and every charge is signed, so there's proof of who said what and what it cost. and the marketplace itself lives on DeWEB (tape://), checked byte by byte by TapeKit, so even the page you buy from can't be replaced.
 
----
-
-use cases
-
--> a DeFi user buys a "position watch" agent and gets signed alerts when their lending position gets risky
--> a trader buys a "token risk check" agent instead of checking every new token by hand
--> a maker sells copies of their risk checker and earns on every sale and resale
--> a team shares one agent for weekly treasury reports and hands it over when the lead changes
--> someone who stops trading sells their configured agent instead of losing it
+anyone can open an agent's page and check its rules, tools and prices for free, without connecting a wallet.
 
 ---
 
-the whole marketplace lives on DeWEB (tape://), so the page you buy from can't be swapped.
+who uses evermo?
 
-evermo earns 5% on sales, a small share on resales, and a small margin on AI usage, shown on every receipt.
+-> makers
+developers, traders, quants and researchers who built an agent that's actually useful and want to sell it as a product, not rent it out through a platform.
+
+-> owners
+traders, people with money in DeFi, researchers and small teams who want an agent working for them every day, under rules they can read.
+
+-> second-hand buyers
+people who'd rather buy an agent that's already set up and proven than build one from zero.
 
 ---
 
-would you pay more for an AI agent if you could check its rules, its tools and its bill, and sell it when you're done?
+real use cases
+
+-> not getting liquidated in your sleep
+someone with a lending position on x layer buys a "position watch" agent and points it at their positions. when the health factor drops, a signed alert lands in their inbox. the agent can only watch, never move funds, because the rules circuit says so.
+
+-> checking new tokens without losing hours
+a trader who looks at new tokens every day buys a "token risk check" agent. it reports on the contract, liquidity and holders of each token in minutes, using tools that can't be secretly changed to do something else.
+
+-> getting paid for a good agent
+the maker of that risk checker lists copies on evermo. they earn on every sale and on every resale through evermo, and their name stays attached to the agent.
+
+-> a team that changes people
+a small DAO shares one agent that prepares weekly treasury reports within set limits. when the lead leaves, the agent is transferred to the new lead with all its setup intact.
+
+-> getting value back
+someone who stops trading after six months lists their configured agent and sells it, instead of throwing the setup away.
+
+---
+
+we have circuits for rules nobody can change, containers for things you can own and transfer, TapeSend for private delivery, DeWEB for pages nobody can swap, and the TAP standards for signed answers, pinned tools and checkable bills.
+
+putting them together turns an AI agent from something you rent into something you own.
+
+---
+
+the rule is simple: if you can't read an agent's rules, check its bill and sell it when you're done, you don't really own it.
+
+evermo is a proposed idea for tapeout idea scouts. nothing has been built yet.
+
+would you pay more for an AI agent if you could check everything it does, and sell it when you no longer need it?
 
 ---
