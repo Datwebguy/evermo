@@ -1,50 +1,43 @@
-# Evermo — Circuit Integration
+# Evermo — Circuits
 
-## TapeOut primitives
+## 1. Agent identity circuits
 
-TapeOut circuits are built from two primitives:
+Each agent is its own circuit NFT on X Layer, taped out as small as possible (a single NAND is enough), so that it has a
+container (ERC-6551). The container holds the agent's site (DeWEB), inbox (TapeSend) and budget. Whoever holds the
+circuit NFT owns the agent.
 
-- NAND: two boolean inputs, output is the negation of AND
-- LATCH: stores one bit of state and updates on the on-chain clock
+## 2. Shared rules circuit (planned)
 
-Any logic is constructed by connecting NAND and LATCH gates. The finished design is a netlist of gates and connections.
+Every agent action is checked before it runs. The runtime (and, for money actions later, a contract) passes the facts as
+input wires and calls `eval(circuitId, inputs)`.
 
-## Tape-out process
+Inputs (1 wire each):
 
-1. Design the netlist in the browser.
-2. Tape out on X Layer. This burns the required NAND and LATCH transistors and mints the circuit as an ERC-721 NFT.
-3. The netlist is stored permanently. The circuit ID and processor address identify it on-chain.
+| Wire | Meaning |
+|------|---------|
+| `permission_valid` | The current owner's signed permission exists, is not revoked and has not expired |
+| `target_allowed` | The protocol or address the action touches is on the owner's allowed list |
+| `is_spend` | The action moves money |
+| `over_single_limit` | The amount is above the owner's per-action limit |
+| `over_daily_limit` | Today's total would pass the owner's daily limit |
 
-## Evaluation
+Outputs:
 
-```solidity
-eval(circuitId, inputs) → outputs
-```
+| Wire | Meaning |
+|------|---------|
+| `allow` | The action may run now |
+| `needs_confirm` | The action may run only after the owner confirms |
 
-- View function, free to call
-- Executes the exact taped-out netlist
-- Returns deterministic results
-- `netlist(circuitId)` returns the full gate list for verification
+Rules:
+- No valid permission or target not allowed → `allow = 0`, `needs_confirm = 0`.
+- Read/alert action → `allow = 1`.
+- Spend within both limits → `allow = 1`.
+- Spend over either limit → `allow = 0`, `needs_confirm = 1`.
 
-## Evermo circuit
-
-The Evermo vault calls `eval` on its rule circuit before minting credits.
-
-Example inputs:
-- Time held or position duration
-- Eligibility flag
-- Position size category
-
-Example outputs:
-- Credit amount
-- Claim allowed indicator
-
-The circuit is taped out on X Layer before claims are active. The processor contract address and circuit ID are included in the hackathon submission.
-
-## DeWEB
-
-The user interface (deposit, claim, burn, withdraw) is stored as files in a circuit container. Users open the interface through the tape:// protocol. The container is bound to a circuit NFT.
+Five inputs, two outputs: a few dozen NAND gates at most. Exact gate count, processor address and circuit ID are added
+after tape-out.
 
 ## Verification
 
-Anyone can call `eval` and `netlist` to confirm the rules. The frontend files can be verified byte-by-byte against the on-chain container contents.
+- Every input combination (32 rows) is tested against the rules above before tape-out.
+- After tape-out, anyone can call `eval` and `netlist(circuitId)` for free to check the rules.

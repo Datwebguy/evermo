@@ -1,42 +1,20 @@
-# Agent Prompt — Evermo
+# Agent prompt — building Evermo
 
-Build Evermo on X Layer.
+Build Evermo on X Layer (chain ID 196): a marketplace where people buy, use and resell AI agents they own, with every
+agent's rules, tools and prices checkable on chain.
 
-Evermo is a vault. Users deposit USDT0, USDC, or OKB and receive a liquid receipt token. The vault earns yield from Aave or an equivalent position on X Layer. When a user claims, the contract calls `eval` on a taped-out TapeOut circuit. The circuit returns the allowed credit amount according to its permanent netlist. The user receives Evermo credits. Credits can be burned to pay TapeOut protocol fees (processor creation, transistor minting, or DeWEB uploads). The interface is hosted in a DeWEB circuit container and accessed via tape://.
+Read first: `docs/PRODUCT.md`, `docs/PROJECT.md`, `docs/CIRCUIT.md`, `docs/JUDGING.md`, `docs/CLAIMS.md`.
 
 ## What to build
 
-- Vault contract on X Layer (chain ID 196)
-- Receipt token (ERC-20)
-- Credit token (ERC-20 with burn function)
-- TapeOut circuit for claim eligibility and credit rate
-- Contract logic that calls `eval` before every credit mint
-- DeWEB frontend with deposit, claim, burn, and withdraw screens
-- Integration points for TapeOut protocol fee payments
-- Clean module structure for contracts and frontend
+See the MVP table in `docs/PROJECT.md`.
 
 ## Standards
 
-- Write clean, neat, and well-structured code
-- Use actively maintained, up-to-date open-source tools for compilation, testing, deployment, and verification
-- Organize files in clear directories and modules
-- Do not list Claude as an author or co-author in the repository, commits, or any metadata
-
-## Chain and references
-
-- Chain ID: 196
-- RPC: https://rpc.xlayer.tech
-- Hackathon: https://web3.okx.com/xlayer/build-x-series
-- Submission form: https://forms.gle/EoDNbxQ65dev1wFd9
-- TapeOut: https://tapeout.net/
-- TapeOut data: https://tapeout.work/
-- X Layer: https://web3.okx.com/xlayer
-- Aave X Layer markets: https://aavetracker.com/markets/x-layer/
-
-## Submission details to prepare
-
-- Processor contract address
-- Circuit ID
-- DeWEB access link
-- Description of the circuit inputs and outputs
-- Explanation of users, revenue, and TapeOut integration
+- Use TapeOut as specified in the TAPs (github.com/TapeOutProtocol/TAPs): TAP-02 netlists, TAP-10 DeWEB and TapeSend,
+  TAP-11 manifests, TAP-13 signed responses, TAP-15 pinned MCP tools, TAP-17 AI receipts, TAP-18 permissions.
+- Confirm every contract address and ABI on X Layer before relying on it; never guess.
+- Clean, neat, well-structured code in clear modules; actively maintained open-source tools for compiling, testing,
+  deploying and verifying.
+- Every feature added must be listed in `docs/CLAIMS.md` with its evidence.
+- Do not list Claude as an author or co-author in the repository, commits or any metadata.

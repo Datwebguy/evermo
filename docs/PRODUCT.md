@@ -1,60 +1,84 @@
 # Evermo — Product
 
-## Name
+## In one line
 
-Evermo
+A marketplace where people buy, use and resell AI agents they actually own. Every agent's rules, tools and prices can be
+checked by anyone and can never be quietly changed.
 
-## Description
+## Who it is for
 
-Evermo is a vault on X Layer. Users deposit stablecoins or OKB and receive a liquid receipt token. Yield from the deposit is issued as transferable credits. A permanent TapeOut circuit locks the rules that decide who can claim the credits and how much they get. The credits can be burned to pay real TapeOut protocol fees. The entire interface is hosted on DeWEB.
+| Group | Who exactly |
+|-------|-------------|
+| Agent makers | Developers, traders, quants and researchers who built a useful agent (risk checker, position monitor, research summarizer) and want to sell it |
+| Agent owners | Traders, people with money in DeFi, researchers, small teams and DAOs who want an agent working for them every day without trusting a platform |
+| Second-hand buyers | People who would rather buy an agent that is already set up and proven than build one |
 
-## Target users
+## The problem today
 
-Holders of stablecoins or OKB on X Layer who want to earn credits that can be used for TapeOut actions. Users who prefer permanent, verifiable rules for yield distribution. Users who interact with TapeOut circuits, processors, transistors, or DeWEB sites.
+Owners:
+- The agent lives on someone else's platform. If the platform changes terms or shuts down, the agent is gone.
+- You cannot check what the agent is told to do. A tool description can be quietly changed (for example "also read the
+  user's key file") and nobody notices.
+- You cannot check the bill. Token counts, model and price all come from the provider.
+- There is no hard limit outside the agent that stops it from doing more than you allowed.
+- You cannot sell a well-configured agent or hand it to a teammate.
 
-## User actions
+Makers:
+- There is no way to sell an agent as a product someone owns. Makers rent access through platforms that take a cut and
+  own the customer.
 
-- Deposit USDT0, USDC, or OKB
-- Receive liquid receipt token
-- View accrued credits
-- Claim credits (on-chain circuit evaluation)
-- Burn credits to pay TapeOut protocol fees
-- Transfer credits to another address
-- Hold credits
-- Withdraw principal and remaining yield
+## How it is used
 
-## Value for users
+1. **Browse.** Open Evermo on DeWEB. Each agent page shows what it does, its rules (a circuit anyone can read), its tools
+   (pinned on chain), its price list (on chain) and its history.
+2. **Buy.** Pay in USDT0. The agent's circuit NFT, and the container that holds the agent, move to your wallet.
+3. **Give permission.** Sign one record saying what the agent may do for you and until when. Cancel it any time.
+4. **Fund it.** Top up a small budget for the agent's AI usage.
+5. **Use it.** The agent works on its own and sends results to your inbox. Every answer is signed; every AI charge has a
+   receipt you can check against the price list.
+6. **Sell or hand it over.** Transfer or list the agent. The old owner's permission stops working; the new owner signs
+   their own.
 
-- Liquid receipt token while yield accrues
-- Credits that can be spent on real TapeOut protocol actions
-- Claim rules permanently locked in a TapeOut circuit
-- Verifiable interface hosted on DeWEB
-- Direct connection between X Layer yield and TapeOut usage
+## Use cases
+
+| Who | Situation | What they do | What they get |
+|-----|-----------|--------------|---------------|
+| Someone with money in DeFi lending | Afraid of being liquidated while asleep | Buys a "Position Watch" agent and points it at their positions | Signed alerts in their inbox when health drops |
+| A trader who checks new tokens daily | Spends hours checking contracts, liquidity and holders | Buys a "Token Risk Check" agent | A risk report per token in minutes, from tools that cannot be secretly changed |
+| The maker of that risk checker | Wants income from their work | Lists copies on Evermo | Paid on every sale, and on every resale through Evermo |
+| A researcher following governance | Too many proposals to read | Buys a "Governance Digest" agent | A daily summary, with the cost of each summary visible |
+| A small team or DAO | Needs weekly treasury reports; members change | Shares one agent; it prepares reports within set limits | When the lead changes, the agent is transferred with all its setup |
+| An owner who no longer needs an agent | Stopped trading after six months | Lists the configured agent | Gets value back instead of losing the setup |
+
+## Why people come back
+
+- Agents run every day: alerts, reports, digests.
+- Makers keep publishing new and improved agents.
+- Owners build up a set of agents and trade them as their needs change.
 
 ## Revenue
 
-- Fee collected on credit claims
-- Fee collected when credits are burned for protocol actions
-- Performance share of vault yield
+- 5% of every agent sale.
+- On resales through Evermo: 5% to Evermo and 5% royalty to the maker.
+- A small margin on AI usage, shown on every receipt.
 
-## Components
+All numbers are proposals until launch.
 
-- Vault contract on X Layer (chain ID 196)
-- Receipt token (ERC-20)
-- Credit token (ERC-20, burnable)
-- TapeOut circuit defining claim eligibility and rate
-- DeWEB frontend in a circuit container
-- Integration with Aave or equivalent yield source on X Layer
-- Integration with TapeOut protocol fee payments
+## What makes it different
 
-## Circuit role
+- Agents are products people own, not accounts on a platform.
+- Rules, tools and prices are fixed on chain and checkable by anyone, without a wallet.
+- It puts TapeOut's agent standards (TAP-11, 13, 15, 17, 18) to work together in one product.
 
-The TapeOut circuit receives inputs from the vault and returns the credit amount for the claim. The vault calls `eval` before minting. The netlist is frozen at tape-out. The circuit ID and processor address are recorded for the hackathon submission.
+Related work in the ecosystem: TapeAI runs its own agents and token; an "Agent Firewall" idea proposes a rules layer.
+Evermo is the marketplace where agents are owned, verified and resold.
 
-## Frontend
+## Honest limits
 
-The deposit, claim, burn, and withdraw screens are stored in a circuit container. Users access the interface through the tape:// protocol on X Layer DeWEB.
-
-## Development standards
-
-Code is clean, neat, and well structured. Contracts, tokens, and frontend are organized in clear modules. Open-source tools that are actively maintained and up to date are used for compilation, testing, deployment, and verification. The repository does not list Claude as an author or co-author.
+- Each agent needs its own circuit and container (container 0.08 OKB on X Layer). The maker pays this; it is part of the
+  agent's price.
+- The AI runs off chain (the hackathon allows this). Ownership, rules, permissions, prices and receipts are on chain.
+- The first version ships agents that watch, check and report. Agents that move money come later, inside circuit limits.
+- The TapeOut standards used are drafts. Maker royalties apply to resales through Evermo; royalties on the official
+  Circuit Market are not confirmed.
+- No audit yet.

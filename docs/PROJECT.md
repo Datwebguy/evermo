@@ -1,47 +1,46 @@
-# Evermo — Project
+# Evermo — Project plan
 
-## Overview
+## Goal
 
-Evermo is a vault on X Layer. Users deposit stablecoins or OKB and receive a liquid receipt token. Yield from the deposit is issued as transferable credits. A permanent TapeOut circuit locks the rules that decide who can claim the credits and how much they get. The credits can be burned to pay real TapeOut protocol fees. The entire interface is hosted on DeWEB.
+Ship a working Evermo on X Layer by 7 December 2026, 23:59 UTC: a DeWEB marketplace where at least two real agents can
+be bought, used, and resold, with every rule, tool and price checkable on chain.
 
-## Goals
+## MVP scope
 
-- Provide a liquid receipt for deposits on X Layer
-- Turn vault yield into transferable credits
-- Lock eligibility and credit rate rules in a permanent TapeOut circuit
-- Allow credits to be burned for TapeOut protocol fee payments
-- Host the user interface in a DeWEB circuit container
-- Deliver a working product that uses TapeOut circuits and DeWEB on X Layer
+| Part | What it does | Where |
+|------|--------------|-------|
+| Agent identity | Each agent is a circuit NFT on X Layer with its own container (ERC-6551) | TapeOut |
+| Agent manifest | `/.well-known/tapeapi.json` in the agent's DeWEB site: endpoints and signer (TAP-11), pinned tool digest `toolsSha256` (TAP-15), AI price table (TAP-17) | DeWEB |
+| Rules circuit | One shared circuit that decides if an agent action is allowed (see `CIRCUIT.md`) | TapeOut, X Layer |
+| Marketplace contract | List, buy with USDT0, resale with maker royalty, fee split | Solidity, X Layer |
+| Agent runtime | Off-chain service: checks the current owner on chain, checks the owner's signed permission (TAP-18), runs the agent, signs every answer (TAP-13), writes AI usage receipts (TAP-17), delivers results | Node.js |
+| Inbox | Results and receipts delivered over TapeSend to the owner's container; in-app inbox as fallback | TapeSend |
+| App | Marketplace, agent page (rules, tools, prices, history), My Agents, Inbox | DeWEB via HashPort, TapeKit |
+| Demo agents | "Position Watch" (lending health alerts on X Layer) and "Token Risk Check" (contract, liquidity and holder checks on X Layer) | Runtime |
 
-## User flow
+Not in the MVP: agents that move money, agent-to-agent hiring, more than two demo agents.
 
-1. User deposits USDT0, USDC, or OKB into the Evermo vault on X Layer.
-2. User receives a liquid receipt token that can be transferred, traded, or used in other contracts.
-3. The vault places the assets into a yield position (Aave or equivalent interest-bearing position on X Layer).
-4. User initiates a claim.
-5. The vault contract calls `eval` on the taped-out TapeOut circuit with the relevant inputs.
-6. The circuit returns the allowed credit amount according to the permanent netlist.
-7. The vault mints Evermo credits to the user.
-8. User can burn credits to cover TapeOut protocol fees, transfer the credits, or hold them.
-9. User can withdraw the deposited principal and remaining yield by burning the receipt token.
+## User flows to demo
 
-## Architecture
+1. Maker publishes an agent: circuit + container created, manifest uploaded, listing created.
+2. Owner buys it with USDT0, signs a permission, tops up a budget.
+3. Agent sends a signed alert with an AI usage receipt to the owner's inbox.
+4. Anyone opens the agent page without a wallet and checks rules, tools and prices.
+5. Owner lists the agent; a second account buys it; the first owner's permission stops working.
 
-- Vault contract (Solidity) on X Layer
-- Receipt token (ERC-20)
-- Credit token (ERC-20 with burn)
-- TapeOut circuit (NAND/LATCH netlist) for claim rules
-- DeWEB frontend stored in a circuit container
-- Access via tape:// protocol
+## Build order
 
-## Hackathon alignment
+1. Confirm on X Layer: `eval` ABI, official processor and NAND price, container opening, TapeSend hub, HashPort upload,
+   wallet connection inside a `tape://` site.
+2. Rules circuit: define, test every input, export for the canvas, tape out.
+3. Marketplace contract and tests.
+4. Agent runtime with TAP-11/13/15/17/18 and the two demo agents.
+5. DeWEB app and upload.
+6. End-to-end run on X Layer, demo video (under 3 minutes), submission.
 
-- Uses TapeOut circuits on X Layer through `eval` calls
-- Frontend runs on X Layer DeWEB
-- Clear product, users, and revenue path
-- Permanent on-chain rules
-- Direct integration with TapeOut protocol fee usage
+## Repository standards
 
-## Development
-
-All code is clean, neat, and well structured. Development uses actively maintained open-source tools that are kept up to date. The repository does not list Claude as an author or co-author.
+- Clean, well-structured code; actively maintained open-source tools.
+- README written for both people and AI judges: what it is, the problem, and "do X → see Y" steps.
+- Every claim in `CLAIMS.md` points to evidence in the repo or on chain.
+- Claude is not listed as an author or co-author anywhere.
