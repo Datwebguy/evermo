@@ -32,10 +32,12 @@ Makers:
 1. **Browse.** Open Evermo on DeWEB. Each agent page shows what it does, its rules (a circuit anyone can read), its tools
    (pinned on chain), its price list (on chain) and its history.
 2. **Buy.** Pay in USDT0. The agent's circuit NFT, and the container that holds the agent, move to your wallet.
-3. **Give permission.** Sign one record saying what the agent may do for you and until when. Cancel it any time.
+3. **Give permission.** Sign one record (a TAP-11 delegation) saying which key may act for your agent and until when.
+   Cancel it any time. Only the current owner's signature counts.
 4. **Fund it.** Top up a small budget for the agent's AI usage.
-5. **Use it.** The agent works on its own and sends results to your inbox. Every answer is signed; every AI charge has a
-   receipt you can check against the price list.
+5. **Use it.** The agent works on its own and sends results to its own container's inbox, which only you can read. Every
+   answer is signed and carries the rules circuit's inputs and result; every AI charge has a receipt you can check against
+   the price list (the receipt shows the model as reported).
 6. **Sell or hand it over.** Transfer or list the agent. The old owner's permission stops working; the new owner signs
    their own.
 
@@ -68,7 +70,7 @@ All numbers are proposals until launch.
 
 - Agents are products people own, not accounts on a platform.
 - Rules, tools and prices are fixed on chain and checkable by anyone, without a wallet.
-- It puts TapeOut's agent standards (TAP-11, 13, 15, 17, 18) to work together in one product.
+- It puts TapeOut's service standards (TAP-10, 11, 13, 15, 17) to work together in one product.
 
 Related work in the ecosystem: TapeAI runs its own agents and token; an "Agent Firewall" idea proposes a rules layer.
 Evermo is the marketplace where agents are owned, verified and resold.

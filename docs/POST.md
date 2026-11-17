@@ -41,13 +41,13 @@ every agent publishes a manifest at /.well-known/tapeapi.json on its DeWEB site 
 before an agent acts, evermo calls eval on a rules circuit: is the owner's permission valid, is this protocol allowed, is the amount over the limit. once it's taped out, nobody can change those rules, including us.
 
 -> its bill is checkable
-prices sit in the agent's on-chain manifest. every answer comes back signed (TAP-13) with a usage receipt (TAP-17): what was asked, which model answered, what it cost.
+prices sit in the agent's on-chain manifest. every answer comes back signed (TAP-13) with a usage receipt (TAP-17): what was asked, which model it reports, what it cost.
 
 -> permission, not keys
-you sign one record (TAP-18): what the agent may do for you and until when. cancel it any time.
+you sign one record (TAP-11): which key may act for your agent and until when. cancel it any time. only the current owner's signature counts.
 
 -> results in your inbox
-alerts and reports arrive encrypted over TapeSend, straight to your container.
+alerts and reports arrive encrypted over TapeSend, in your agent's own container. only its current owner can read them.
 
 -> resell when you're done
 list the agent on evermo. when someone buys it, your permission stops working and theirs begins. the maker earns a royalty on every resale through evermo.
@@ -56,7 +56,7 @@ list the agent on evermo. when someone buys it, your permission stops working an
 
 why it can't be faked
 
-the rules are a taped-out circuit, the tools are pinned by hash, every answer and charge is signed, and the marketplace lives on DeWEB (tape://), checked byte by byte by TapeKit, so even the page you buy from can't be swapped.
+the rules are a taped-out circuit (and every answer carries the circuit's inputs and result, so anyone can re-run it), the tools are pinned by hash, every answer and charge is signed, and the marketplace lives on DeWEB (tape://), checked byte by byte by TapeKit, so even the page you buy from can't be swapped.
 
 anyone can check an agent's rules, tools and prices for free, without connecting a wallet.
 

@@ -13,8 +13,8 @@ be bought, used, and resold, with every rule, tool and price checkable on chain.
 | Agent manifest | `/.well-known/tapeapi.json` in the agent's DeWEB site: endpoints and signer (TAP-11), pinned tool digest `toolsSha256` (TAP-15), AI price table (TAP-17) | DeWEB |
 | Rules circuit | One shared circuit that decides if an agent action is allowed (see `CIRCUIT.md`) | TapeOut, X Layer |
 | Marketplace contract | List, buy with USDT0, resale with maker royalty, fee split | Solidity, X Layer |
-| Agent runtime | Off-chain service: checks the current owner on chain, checks the owner's signed permission (TAP-18), runs the agent, signs every answer (TAP-13), writes AI usage receipts (TAP-17), delivers results | Node.js |
-| Inbox | Results and receipts delivered over TapeSend to the owner's container; in-app inbox as fallback | TapeSend |
+| Agent runtime | Off-chain service: checks the current owner on chain, checks the owner's signed delegation (TAP-11), calls the rules circuit, runs the agent, signs every answer with the circuit's inputs and result (TAP-13), writes AI usage receipts (TAP-17), delivers results | Node.js |
+| Inbox | Results and receipts delivered over TapeSend to the agent's own container, readable by its current holder; in-app inbox as fallback | TapeSend |
 | App | Marketplace, agent page (rules, tools, prices, history), My Agents, Inbox | DeWEB via HashPort, TapeKit |
 | Demo agents | "Position Watch" (lending health alerts on X Layer) and "Token Risk Check" (contract, liquidity and holder checks on X Layer) | Runtime |
 
@@ -23,15 +23,16 @@ Not in the MVP: agents that move money, agent-to-agent hiring, more than two dem
 ## User flows to demo
 
 1. Maker publishes an agent: circuit + container created, manifest uploaded, listing created.
-2. Owner buys it with USDT0, signs a permission, tops up a budget.
+2. Owner buys it with USDT0, signs a delegation (permission), tops up a budget.
 3. Agent sends a signed alert with an AI usage receipt to the owner's inbox.
 4. Anyone opens the agent page without a wallet and checks rules, tools and prices.
 5. Owner lists the agent; a second account buys it; the first owner's permission stops working.
 
 ## Build order
 
-1. Confirm on X Layer: `eval` ABI, official processor and NAND price, container opening, TapeSend hub, HashPort upload,
-   wallet connection inside a `tape://` site.
+1. Confirm on X Layer what `docs/VERIFICATION.md` still lists as open: wallet connection inside a `tape://` site, opening
+   containers through the official opener, processor and transistor price, HashPort upload. (`eval`, contract addresses
+   and costs are already verified there.)
 2. Rules circuit: define, test every input, export for the canvas, tape out.
 3. Marketplace contract and tests.
 4. Agent runtime with TAP-11/13/15/17/18 and the two demo agents.

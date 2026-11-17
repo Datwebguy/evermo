@@ -11,8 +11,9 @@ See the MVP table in `docs/PROJECT.md`.
 
 ## Standards
 
-- Use TapeOut as specified in the TAPs (github.com/TapeOutProtocol/TAPs): TAP-02 netlists, TAP-10 DeWEB and TapeSend,
-  TAP-11 manifests, TAP-13 signed responses, TAP-15 pinned MCP tools, TAP-17 AI receipts, TAP-18 permissions.
+- Use TapeOut as specified in the TAPs (github.com/TapeOutProtocol/TAPs): TAP-02 netlists and `eval`, TAP-10 DeWEB and
+  TapeSend, TAP-11 manifests and delegations (owner permission), TAP-13 signed responses, TAP-15 pinned MCP tools, TAP-17 AI
+  receipts. See `docs/VERIFICATION.md` for verified addresses and what is still open.
 - Confirm every contract address and ABI on X Layer before relying on it; never guess.
 - Clean, neat, well-structured code in clear modules; actively maintained open-source tools for compiling, testing,
   deploying and verifying.

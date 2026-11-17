@@ -33,12 +33,14 @@ Evermo is a marketplace on X Layer where AI agents are things people own.
   (TAP-11), with a hash of its exact tool descriptions (TAP-15). If anyone quietly changes what the agent is told to do,
   the hash stops matching and the change is refused.
 - **Its rules are a circuit.** Before an agent acts, Evermo calls `eval` on a rules circuit: is the owner's permission
-  valid, is this protocol allowed, is the amount over the limit. Once taped out, nobody can change those rules.
+  valid, is this protocol allowed, is the amount over the limit. Once taped out, nobody can change those rules, and every
+  signed answer carries the circuit's inputs and result so anyone can re-run it.
 - **Its bill is checkable.** Prices sit in the agent's on-chain manifest. Every answer comes back signed (TAP-13) with a
-  usage receipt (TAP-17): what was asked, which model answered, what it cost.
-- **Permission, not keys.** The owner signs one record (TAP-18): what the agent may do and until when. It can be cancelled
-  any time.
-- **Results in your inbox.** Alerts and reports arrive encrypted over TapeSend, straight to the owner's container.
+  usage receipt (TAP-17): what was asked, which model it reports, what it cost.
+- **Permission, not keys.** The owner signs one record (TAP-11 delegation): which key may act for the agent and until when.
+  It can be cancelled any time, and only the current owner's signature counts.
+- **Results in your inbox.** Alerts and reports arrive encrypted over TapeSend in the agent's own container; only its
+  current owner can read them.
 - **Resell when you're done.** When an agent is sold on Evermo, the old owner's permission stops working and the new
   owner's begins. The maker earns a royalty on every resale through Evermo.
 
@@ -89,10 +91,9 @@ swapped. Anyone can check an agent's rules, tools and prices for free, without c
 - **DeWEB + HashPort + TapeKit:** the marketplace and every agent page are on-chain sites opened via `tape://`, verified
   byte by byte.
 - **TapeSend:** encrypted delivery of agent results and receipts to owners.
-- **TAP-11 / TAP-13:** service manifest and signed answers for every agent.
+- **TAP-11 / TAP-13:** service manifest, the owner's signed delegation (permission), and signed answers for every agent.
 - **TAP-15:** tool descriptions pinned by hash; quiet changes are refused.
 - **TAP-17:** on-chain price tables and signed usage receipts.
-- **TAP-18:** owners' signed permissions.
 
 Together: circuits for rules nobody can change, containers for things you can own and transfer, TapeSend for private
 delivery, DeWEB for pages nobody can swap, and the TAP standards for signed answers, pinned tools and checkable bills.
