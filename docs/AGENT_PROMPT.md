@@ -18,4 +18,3 @@ See the MVP table in `docs/PROJECT.md`.
 - Clean, neat, well-structured code in clear modules; actively maintained open-source tools for compiling, testing,
   deploying and verifying.
 - Every feature added must be listed in `docs/CLAIMS.md` with its evidence.
-- Do not list Claude as an author or co-author in the repository, commits or any metadata.

@@ -49,7 +49,7 @@ prices sit in the agent's on-chain manifest. every answer comes back signed (TAP
 you sign one record (TAP-11): which key may act for your agent and until when. cancel it any time. only the current owner's signature counts.
 
 -> results in your inbox
-alerts and reports arrive encrypted over TapeSend, in your agent's own container. only its current owner can read them.
+alerts and reports arrive encrypted over TapeSend, in your agent's own container, readable by whoever owns the agent when they're sent.
 
 -> resell when you're done
 list the agent on evermo. a resale circuit checks every sale, and the price is split the moment it's paid: the seller, the maker's royalty, and evermo's fee, with nothing left sitting in the contract. your permission ends, the new owner's begins.

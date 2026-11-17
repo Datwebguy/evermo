@@ -45,4 +45,3 @@ Not in the MVP: agents paying arbitrary third parties, agent-to-agent hiring, mo
 - Clean, well-structured code; actively maintained open-source tools.
 - README written for both people and AI judges: what it is, the problem, and "do X → see Y" steps.
 - Every claim in `CLAIMS.md` points to evidence in the repo or on chain.
-- Claude is not listed as an author or co-author anywhere.

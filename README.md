@@ -31,10 +31,12 @@ Idea and plan. Claims and their evidence: `docs/CLAIMS.md`.
 |------|----------|
 | `docs/PRODUCT.md` | Users, problem, how it is used, use cases, revenue, limits |
 | `docs/PROJECT.md` | MVP scope, demo flows, build order |
-| `docs/CIRCUIT.md` | Agent circuits and the shared rules circuit |
+| `docs/CIRCUIT.md` | Agent circuits, the budget circuit and the resale circuit |
 | `docs/JUDGING.md` | Hackathon requirements, criteria, self-assessment, AI-judge preparation |
 | `docs/CLAIMS.md` | Every claim with its evidence |
 | `docs/VERIFICATION.md` | What was checked against the TapeOut specs and live on X Layer |
+| `docs/JUDGE_REPORT.md` | Latest claim-by-claim judge report |
+| `verification/` | Scripts that reproduce every check in `docs/VERIFICATION.md` |
 | `docs/SUBMISSION.md` | Form text, ready to paste |
 | `docs/POST.md` | X thread |
 | `docs/AGENT_PROMPT.md` | Instructions for building agents working on this repo |

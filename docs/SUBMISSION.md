@@ -25,6 +25,10 @@ platform that takes a cut and owns the customers.
 
 ## Product
 
+**Status: idea stage.** Everything below describes what we are building; nothing is deployed yet. The TapeOut steps it
+relies on (tape-out, `eval`, containers, DeWEB uploads, ownership transfer, TapeSend) have been tested against the live
+X Layer contracts on a mainnet fork (see `docs/VERIFICATION.md` in the repository).
+
 Evermo is a marketplace on X Layer where AI agents are things people own.
 
 - **Every agent is a circuit.** Each agent is a TapeOut circuit NFT with its own ERC-6551 container holding its site,
@@ -39,8 +43,8 @@ Evermo is a marketplace on X Layer where AI agents are things people own.
   usage receipt (TAP-17): what was asked, which model it reports, what it cost.
 - **Permission, not keys.** The owner signs one record (TAP-11 delegation): which key may act for the agent and until when.
   It can be cancelled any time, and only the current owner's signature counts.
-- **Results in your inbox.** Alerts and reports arrive encrypted over TapeSend in the agent's own container; only its
-  current owner can read them.
+- **Results in your inbox.** Alerts and reports arrive encrypted over TapeSend in the agent's own container, readable
+  by whoever owns the agent when they are sent.
 - **Resell when you're done.** A resale circuit checks every sale on Evermo, and the price is split the moment it is paid:
   the seller, the maker's royalty and Evermo's fee, with nothing left sitting in the contract. The old owner's permission
   ends and the new owner's begins.
@@ -124,4 +128,5 @@ They turn an AI agent from something you rent into something you own.
 
 ## Status
 
-New project built during the event.
+New project for this event, at idea stage. Feasibility on X Layer is verified; the build is next. Processor address,
+circuit IDs, access links and the demo video are added when deployed.

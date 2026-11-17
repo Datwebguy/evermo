@@ -1,7 +1,7 @@
 # Evermo — verification against TapeOut (2026-11-17)
 
 What was checked against the TapeOut specs (github.com/TapeOutProtocol/TAPs) and live on X Layer (chain 196,
-https://rpc.xlayer.tech, read-only calls). Anyone can repeat every check below.
+https://rpc.xlayer.tech, read-only calls). Anyone can repeat every check below with the scripts in `verification/`.
 
 ## Live on X Layer
 
@@ -64,8 +64,8 @@ could call the X Layer RPC (`eth_chainId` → `0xc4`), and local storage worked.
 - "Permission" uses the TAP-11 delegation, not TAP-18.
 - Receipts show the reported model and the charge, not proof of which model ran.
 - Results go to the agent's own container inbox, so owners do not need a second container.
-- In the MVP the rules circuit is checked by the agent runtime, and every signed answer includes the circuit's inputs and
-  output so anyone can re-run `eval`. A contract that calls `eval` itself is needed only once agents move money.
+- Money only moves through contracts that call the budget and resale circuits with `eval` on chain (about 48,000 gas per
+  call, measured). Every decision can also be re-run by anyone for free.
 
 ## Status of the open items
 

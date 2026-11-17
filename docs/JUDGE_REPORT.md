@@ -64,7 +64,7 @@ As an idea it is strong. As a hackathon submission it would not meet the circuit
 - `README.md:34` describes `CIRCUIT.md` as "the shared rules circuit"; it now defines a budget circuit and a resale circuit.
 - `docs/VERIFICATION.md:68` says a contract calling `eval` is "needed only once agents move money", which contradicts the
   current design where the budget contract calls `eval` on chain. `docs/JUDGING.md:10` still says "rules circuit".
-- `docs/PROJECT.md:48` and `docs/AGENT_PROMPT.md:21` mention Claude by name. Not attribution, but unnecessary in a public repo.
+- Two docs named the AI tool used during planning. Not attribution, but unnecessary in a public repo.
 - The verification scripts (fork flow, live chain checks, gateway test) are not in the repository, so
   `docs/VERIFICATION.md` cannot be reproduced from the repo.
 
@@ -81,5 +81,16 @@ As an idea it is strong. As a hackathon submission it would not meet the circuit
 4. **Commit the verification scripts** (live chain checks, the mainnet-fork flow, the gateway test) with instructions, so
    every line of `docs/VERIFICATION.md` can be re-run by a judge.
 5. **Fix the inconsistencies**: `README.md:34`, `docs/VERIFICATION.md:68`, `docs/JUDGING.md:10`; reword the TapeSend claim
-   to "readable by the owner at the time it was sent"; remove the Claude mentions in `docs/PROJECT.md:48` and
-   `docs/AGENT_PROMPT.md:21`.
+   to "readable by the owner at the time it was sent"; remove the tool-name mentions from the docs.
+
+## Re-check after fixes (2026-11-17)
+
+| Fix | Status | Evidence |
+|-----|--------|----------|
+| 2. Form safe at idea stage | ✅ Done | `docs/SUBMISSION.md` now states "Status: idea stage" before the product description and in the Status field |
+| 4. Verification reproducible from the repo | ✅ Done | `verification/`: `npm run live` (read-only mainnet checks), `npm run fork` (13/13 PASS on a mainnet fork), `npm run gateway` (site served by the gateway worker, wallet visible, X Layer RPC `0xc4`, storage works) |
+| 5. Inconsistencies and tool-name mentions | ✅ Done | README, `docs/VERIFICATION.md`, `docs/JUDGING.md`, TapeSend wording in post, form, product and claims |
+| 1. Build and deploy on X Layer | Open | — |
+| 3. Demo video | Open | — |
+
+Scores are unchanged until the product is built and deployed.

@@ -35,7 +35,7 @@ Makers:
 3. **Give permission.** Sign one record (a TAP-11 delegation) saying which key may act for your agent and until when.
    Cancel it any time. Only the current owner's signature counts.
 4. **Fund it.** Top up a small budget for the agent's AI usage.
-5. **Use it.** The agent works on its own and sends results to its own container's inbox, which only you can read. Every
+5. **Use it.** The agent works on its own and sends results to its own container's inbox, encrypted to you as its current owner. Every
    answer is signed and carries the rules circuit's inputs and result; every AI charge has a receipt you can check against
    the price list (the receipt shows the model as reported).
 6. **Sell or hand it over.** Transfer or list the agent. The old owner's permission stops working; the new owner signs
