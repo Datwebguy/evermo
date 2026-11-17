@@ -36,8 +36,10 @@ and TapeOut's stated direction (TAPs).
 
 ## Top candidate: Evermo, escrowed invoices and a dollar account for freelancers
 
-**Problem (users' words):** "the client ghosted after I delivered", "Fiverr takes 20%", "Payoneer froze my account", "how do
-I get paid in dollars without losing to the exchange rate".
+**Problem (users' words):** "the client ghosted after I delivered", "the platform takes 20%", "my payout account got frozen",
+"how do I get paid in dollars without losing to the exchange rate".
+
+The product is global: freelancers and clients anywhere. The country statistics above are only evidence of demand.
 
 **Product:** a freelancer sends a job link to their own client. The client funds it in USDT0/USDC; the money is held in
 escrow on X Layer (earning Aave yield meanwhile). The freelancer delivers; the client approves, or payment releases
@@ -45,7 +47,7 @@ automatically after a review window. Paid money lands in the freelancer's Evermo
 by the freelancer's rules (save, send to family, keep for spending).
 
 **Why this one:**
-- Matches the strongest evidence: getting paid from abroad is the main everyday stablecoin use.
+- Matches the strongest evidence: getting paid by clients in other countries is a main everyday stablecoin use.
 - No cold start: freelancers bring their own clients, and every invoice shows Evermo to a new client.
 - Clear revenue: a small fee per paid job, far below marketplace fees.
 - Monthly habit: income arrives every month.
