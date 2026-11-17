@@ -17,7 +17,7 @@ right now people who want an AI agent are stuck between two options:
 -> build and run your own: servers, keys, maintenance, and no easy way to prove to anyone what it does
 -> rent one from a platform: it lives in their account, under their rules
 
-makers have it just as bad. a great agent can't be sold as a product, only rented out through a platform that takes a cut and owns the customers.
+makers have the same problem from the other side. a great agent is usually sold as access on a platform, not as something the buyer owns.
 
 ---
 
