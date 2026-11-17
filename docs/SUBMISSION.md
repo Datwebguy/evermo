@@ -14,11 +14,11 @@ it when you're done. Buy once, own it, sell it whenever you want.
 
 ## Problem it solves
 
-People who want an AI agent today are stuck between two bad options:
-- Build their own: servers, keys, maintenance, and no way to prove what it does.
-- Rent one from a platform: it lives in the platform's account, under the platform's rules, and disappears with it. Its
-  tools can be quietly changed, its bill can't be checked, and a well-configured agent can't be sold or handed to a
-  teammate.
+Most AI agents people use today are rented. People who want one are stuck between two options:
+- Build and run their own: servers, keys, maintenance, and no easy way to prove to anyone what it does.
+- Rent one from a platform: it lives in the platform's account and under its rules. The tools it uses can be updated
+  behind the scenes, the bill is whatever the provider's own numbers say, and a well-configured agent can't be sold or
+  handed to a teammate.
 
 Makers have the same problem from the other side: a great agent can't be sold as a product, only rented out through a
 platform that takes a cut and owns the customers.

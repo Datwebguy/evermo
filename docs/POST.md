@@ -2,22 +2,20 @@
 
 ---
 
-looking at what @TapeOutWorld has shipped on @XLayerOfficial, we already have every piece for something i really want to exist: AI agents you actually own. 🧵
+looking at what @TapeOutWorld has shipped on @XLayerOfficial, we already have the pieces for something i really want to exist: AI agents you actually own. 🧵
 
 ---
 
-imagine you spend weeks setting up an AI agent that watches your DeFi positions. you tune it, you trust it, you pay for it every month.
+most AI agents people use today are rented. you set one up on a platform, tune it, trust it, and pay for it every month.
 
-then the platform changes its pricing. or shuts the agent down. or quietly updates one of its tools, and now the agent is being told to do something you never agreed to.
+but it lives in their account. if they change pricing or shut it down, it's gone. the tools it uses can be updated behind the scenes, so what the agent is told to do can change without you noticing. and the bill is whatever the provider's own numbers say.
 
-you can't check what changed or what you were charged for. and when you stop needing it, all that setup is worth nothing. you can't sell it or even hand it to a teammate.
+and when you stop needing it, all that setup is worth nothing. you can't sell it or hand it to a teammate.
 
----
+right now people who want an AI agent are stuck between two options:
 
-right now people who want an AI agent are stuck between two bad options:
-
--> build your own: servers, keys, maintenance, and no way to prove what it does
--> rent one from a platform: it lives in their account, under their rules, and disappears with them
+-> build and run your own: servers, keys, maintenance, and no easy way to prove to anyone what it does
+-> rent one from a platform: it lives in their account, under their rules
 
 makers have it just as bad. a great agent can't be sold as a product, only rented out through a platform that takes a cut and owns the customers.
 
