@@ -18,6 +18,13 @@ export function deployment() {
     registry: need("REGISTRY_ADDRESS"),
     budget: need("BUDGET_ADDRESS"),
     operatorKey: need("OPERATOR_KEY"),
-    publicUrl: need("PUBLIC_URL"),
+    publicUrl: need("PUBLIC_URL").replace(/\/$/, ""),
+    agentsFile: need("AGENTS_FILE"),
+    dataDir: opt("DATA_DIR", "./data"),
+    payee: need("FEE_PAYEE"),
+    usdt0: "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+    aiMarginBps: BigInt(opt("AI_MARGIN_BPS", "1000")),
+    watchEveryMinutes: Number(opt("WATCH_EVERY_MINUTES", "10")),
+    port: Number(opt("PORT", "8787")),
   };
 }

@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "tsx --test test/*.test.ts",
-    "start": "tsx src/server.ts"
+    "start": "tsx src/server.ts",
+    "live": "tsx scripts/live-check.ts"
   },
   "dependencies": {
     "ethers": "^6.17.0"
