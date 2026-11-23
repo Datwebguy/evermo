@@ -1,22 +1,22 @@
 # Evermo — claims and evidence
 
-Every claim made in the README, the post and the submission form, with the evidence that backs it.
-Status: **planned** (not built), **built** (evidence in repo), **live** (evidence on X Layer).
-Nothing may be marked built or live without evidence.
+Status: **planned** (not built), **built** (evidence in repo), **live** (evidence on X Layer mainnet).
+Nothing is marked built or live without evidence.
 
 | # | Claim | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | Each agent is a TapeOut circuit NFT on X Layer with its own container | planned | — |
-| 2 | Whoever holds the agent's circuit NFT owns the agent | planned | — |
-| 3 | An agent's budget can only pay when the budget circuit allows it; the budget contract calls `eval` on chain | planned | `eval` from a transaction verified on X Layer (~48,000 gas): `docs/VERIFICATION.md` |
-| 4 | Agent tool descriptions are pinned on chain (TAP-15) and a change is detected and refused | planned | — |
-| 5 | Every agent answer is signed (TAP-13) | planned | — |
-| 6 | Every AI charge has a signed usage receipt (reported model, usage, amount) checkable against an on-chain price table (TAP-17) | planned | — |
-| 7 | Owners sign a delegation (TAP-11); it stops working when the agent changes hands | planned | — |
-| 8 | Results are delivered over TapeSend to the agent's container, readable by whoever holds the agent when they are sent | planned | Sending and inbox tested on a mainnet fork: `docs/VERIFICATION.md` |
-| 9 | Agents can be bought with USDT0 and resold; a resale circuit checks each sale and the payment is split instantly between seller, maker and Evermo | planned | — |
-| 10 | The marketplace and agent pages are DeWEB sites opened via `tape://` | planned | — |
-| 11 | Anyone can check an agent's rules, tools and prices without a wallet | planned | — |
-| 12 | Demo agent "Position Watch" sends lending health alerts on X Layer | planned | — |
-| 13 | Demo agent "Token Risk Check" reports on contracts, liquidity and holders on X Layer | planned | — |
-| 14 | Every budget and resale decision is shown on the agent's page | planned | — |
+| 1 | Each agent is a TapeOut circuit NFT with its own container; whoever holds it owns the agent | planned | Feasibility: `docs/VERIFICATION.md` |
+| 2 | Agent tools are pinned by hash in the agent's manifest and a change is refused | planned | — |
+| 3 | Payments from an agent's budget only go through if the budget circuit allows them (`eval` on chain) | planned | `eval` from a transaction verified on a fork: `docs/VERIFICATION.md` |
+| 4 | Every answer is signed and comes with a usage receipt | planned | — |
+| 5 | The owner's operator permission stops working when the agent changes hands | planned | — |
+| 6 | Results are delivered encrypted over TapeSend to the agent's container | planned | Sending tested on a fork: `docs/VERIFICATION.md` |
+| 7 | A resale circuit checks each sale; seller, builder royalty and Evermo fee are paid in the same transaction | planned | — |
+| 8 | Work, payments and sales are recorded on chain per agent as its track record | planned | — |
+| 9 | Agents running on other platforms can be registered and sold | planned | — |
+| 10 | Agents can be paid for in BEM or USDT0; half of the fee on BEM sales goes to the burn address | planned | — |
+| 11 | Wallets connect with OKX Connect; agents can pay for services over x402 from their budget | planned | — |
+| 12 | Agent pages show the circuits' inputs and decisions live | planned | — |
+| 13 | Browsing, track records and demo agents work without a wallet | planned | — |
+| 14 | Demo agent "Position Watch" alerts on lending health on X Layer | planned | — |
+| 15 | Demo agent "Token Risk Check" reports on contracts, liquidity and holders on X Layer | planned | — |

@@ -2,91 +2,97 @@
 
 ## In one line
 
-A marketplace where people buy, use and resell AI agents they actually own. Every agent's rules, tools and prices can be
-checked by anyone and can never be quietly changed.
+Evermo is where AI agents are bought, used, proven and resold, whatever platform they were built on.
+
+## The problem
+
+- Most AI agents people use today are rented. They live in a platform's account and under its rules. If the platform
+  changes its price or shuts the agent down, the setup is gone.
+- The tools an agent uses can be updated behind the scenes, so what the agent is told to do can change without the owner
+  noticing.
+- The bill is whatever the provider's own numbers say.
+- A well-configured agent has no resale value: it can't be sold or handed to a teammate, and its history of good work
+  stays locked in the platform that ran it.
+- People who build good agents can sell access, but buyers never own what they paid for, and the builder earns nothing
+  when the agent changes hands later.
+
+## What Evermo does
+
+The whole life of an agent people own:
+
+1. **Buy.** An agent is a TapeOut circuit with its own container. Whoever holds the circuit owns the agent.
+2. **Use.** The owner gives the agent a budget and limits. Every payment from the budget is checked on chain by a
+   taped-out budget circuit. Every answer is signed and comes with a receipt. The agent's tools are pinned by hash.
+3. **Prove.** Every piece of work and every payment is recorded on chain against the agent, building a track record
+   anyone can check without a wallet. The record moves with the agent.
+4. **Resell.** The owner lists the agent. A taped-out resale circuit checks every sale, and the payment is split the
+   moment it is paid between the seller, the maker and Evermo.
+
+## Features
+
+| # | Feature | What it does |
+|---|---------|--------------|
+| 1 | Ownership | Each agent is a TapeOut circuit NFT with an ERC-6551 container holding its site, inbox and budget |
+| 2 | Pinned tools | The agent's tool list is hashed into its manifest (TAP-11, TAP-15); a quiet change is refused |
+| 3 | Budget circuit | Payments from an agent's budget only go through if the taped-out budget circuit allows them |
+| 4 | Signed answers and receipts | Every answer is signed (TAP-13) with a usage receipt (TAP-17) |
+| 5 | Permission tied to the owner | The owner authorises an operator key with limits and an end date; it stops working the moment the agent changes hands |
+| 6 | Private delivery | Results arrive encrypted over TapeSend in the agent's container |
+| 7 | Resale with instant split | Listings are escrowed; a resale circuit checks each sale; seller, maker royalty and Evermo fee are paid in the same transaction |
+| 8 | Track record | Work, payments and sales are recorded on chain per agent and shown on its page |
+| 9 | Agents from anywhere | Any builder can register an agent that runs on another platform: they create its Evermo identity circuit and point its manifest to their own service |
+| 10 | BEM payments | Agents can be priced and paid in BEM or USDT0; half of Evermo's fee on BEM sales is sent to the burn address |
+| 11 | OKX tools | OKX Connect for wallets; agents can pay for services over x402 from their budget |
+| 12 | Live circuit view | Each agent page shows the budget and resale circuits, their inputs and their decisions as they happen |
+| 13 | Free entry | Browsing, track records and the demo agents work without a wallet |
 
 ## Who it is for
 
 | Group | Who exactly |
 |-------|-------------|
-| Agent makers | Developers, traders, quants and researchers who built a useful agent (risk checker, position monitor, research summarizer) and want to sell it |
-| Agent owners | Traders, people with money in DeFi, researchers, small teams and DAOs who want an agent working for them every day without trusting a platform |
-| Second-hand buyers | People who would rather buy an agent that is already set up and proven than build one |
-
-## The problem today
-
-Owners:
-- The agent lives on someone else's platform. If the platform changes terms or shuts down, the agent is gone.
-- You cannot check what the agent is told to do. A tool description can be quietly changed (for example "also read the
-  user's key file") and nobody notices.
-- You cannot check the bill. Token counts, model and price all come from the provider.
-- There is no hard limit outside the agent that stops it from doing more than you allowed.
-- You cannot sell a well-configured agent or hand it to a teammate.
-
-Makers:
-- There is no way to sell an agent as a product someone owns. Makers rent access through platforms that take a cut and
-  own the customer.
-
-## How it is used
-
-1. **Browse.** Open Evermo on DeWEB. Each agent page shows what it does, its rules (a circuit anyone can read), its tools
-   (pinned on chain), its price list (on chain) and its history.
-2. **Buy.** Pay in USDT0. The agent's circuit NFT, and the container that holds the agent, move to your wallet.
-3. **Give permission.** Sign one record (a TAP-11 delegation) saying which key may act for your agent and until when.
-   Cancel it any time. Only the current owner's signature counts.
-4. **Fund it.** Top up a small budget for the agent's AI usage.
-5. **Use it.** The agent works on its own and sends results to its own container's inbox, encrypted to you as its current owner. Every
-   answer is signed and carries the rules circuit's inputs and result; every AI charge has a receipt you can check against
-   the price list (the receipt shows the model as reported).
-6. **Sell or hand it over.** Transfer or list the agent. The old owner's permission stops working; the new owner signs
-   their own.
+| Builders | Developers, traders, quants and researchers who built a useful agent and want to sell it, here or from another platform |
+| Owners | Traders, DeFi users, researchers and small teams who want an agent working for them every day under rules they can read |
+| Second-hand buyers | People who would rather buy a proven agent than build one |
+| BEM holders | People who want BEM to be used, not just held |
 
 ## Use cases
 
-| Who | Situation | What they do | What they get |
-|-----|-----------|--------------|---------------|
-| Someone with money in DeFi lending | Afraid of being liquidated while asleep | Buys a "Position Watch" agent and points it at their positions | Signed alerts in their inbox when health drops |
-| A trader who checks new tokens daily | Spends hours checking contracts, liquidity and holders | Buys a "Token Risk Check" agent | A risk report per token in minutes, from tools that cannot be secretly changed |
-| The maker of that risk checker | Wants income from their work | Lists copies on Evermo | Paid on every sale, and on every resale through Evermo |
-| A researcher following governance | Too many proposals to read | Buys a "Governance Digest" agent | A daily summary, with the cost of each summary visible |
-| A small team or DAO | Needs weekly treasury reports; members change | Shares one agent; it prepares reports within set limits | When the lead changes, the agent is transferred with all its setup |
-| An owner who no longer needs an agent | Stopped trading after six months | Lists the configured agent | Gets value back instead of losing the setup |
-
-## How Evermo grows TapeOut
-
-Every agent created is a circuit taped out (transistors burned), a container opened, a DeWEB site published and a steady
-flow of TapeSend messages. Every sale and every budget payment runs a TapeOut circuit on chain.
+| Who | Situation | What they do on Evermo | What they get | Features |
+|-----|-----------|------------------------|---------------|----------|
+| A DeFi user with a lending position | Afraid of liquidation overnight | Buys "Position Watch", sets a 5 USDT0 daily budget | A signed alert in the agent's inbox when health drops; the budget can never be overspent | 1, 3, 4, 6 |
+| A trader checking new tokens daily | Hours lost on research | Buys "Token Risk Check" after reading its track record | Reports in minutes from tools that can't be secretly changed | 2, 4, 8, 13 |
+| An agent builder | Built a good agent on another platform | Registers it on Evermo and lists it in BEM or USDT0 | Earns on the first sale and a royalty on every resale | 7, 9, 10 |
+| A buyer on a budget | Wants a proven agent, not a gamble | Compares agents by track record and buys a second-hand one | A working agent with real history, for less | 7, 8, 13 |
+| A small DAO | Weekly treasury reports; the lead keeps changing | Shares one agent with a circuit-enforced daily budget | The new lead takes over with the setup intact; the old permission ends automatically | 1, 3, 5 |
+| An agent that pays for data | Needs paid APIs to do its job | Pays per call over x402 from its budget | Every payment is checked by the budget circuit first | 3, 11 |
+| A first-time visitor | Never used an on-chain agent | Opens Evermo, watches the circuits decide, tries a demo agent | Understands it before connecting a wallet | 12, 13 |
+| A BEM holder | Wants BEM to be used | Buys and pays for agents in BEM | Every BEM sale sends part of the fee to the burn address | 10 |
+| An owner who stopped trading | Agent no longer needed | Lists it with its track record | Gets more back because the record shows it works | 7, 8 |
 
 ## Why people come back
 
-- Agents run every day: alerts, reports, digests.
-- Makers keep publishing new and improved agents.
-- Owners build up a set of agents and trade them as their needs change.
+- Agents work every day: alerts, reports, checks.
+- Track records grow with use, which makes each agent worth more.
+- Builders earn on every resale, so they keep publishing better agents.
 
 ## Revenue
 
-- 5% of every agent sale.
-- On resales through Evermo: 5% to Evermo and 5% royalty to the maker.
+- 5% of every sale (first sale and resales).
+- On resales: 5% royalty to the builder.
+- On BEM sales, half of Evermo's fee goes to the burn address.
 - A small margin on AI usage, shown on every receipt.
 
-All numbers are proposals until launch.
+## How Evermo grows TapeOut
 
-## What makes it different
-
-- Agents are products people own, not accounts on a platform.
-- Buy once, own it, sell it whenever you want; every sale is split instantly between seller, maker and Evermo.
-- An agent's budget can only pay for what its owner allowed, enforced on chain by a TapeOut circuit.
-- Rules, tools and prices are fixed on chain and checkable by anyone, without a wallet.
-- It puts TapeOut's service standards (TAP-10, 11, 13, 15, 17) to work together in one product.
-
-Evermo is the marketplace where whole agents are owned, verified and resold.
+Every agent is a circuit taped out and a container opened. Every budget payment and every sale runs a TapeOut circuit on
+chain. Agent pages are DeWEB sites and results travel over TapeSend.
 
 ## Honest limits
 
-- Each agent needs its own circuit and container: about 0.082 OKB on X Layer (verified). The maker pays this; it is part
-  of the agent's price.
-- The AI runs off chain (the hackathon allows this). Ownership, rules, permissions, prices and receipts are on chain.
-- In the first version, the only money an agent moves is its own budget (for AI usage and services), always through the
-  budget circuit.
-- The TapeOut standards used are drafts. Maker royalties apply to resales through Evermo; royalties on the official
-  Circuit Market are not confirmed.
+- Each agent needs its own identity circuit and container: about 0.082 OKB on X Layer (verified on a mainnet fork).
+- The AI runs off chain, which the hackathon allows. Ownership, permissions, budgets, payments, sales and the track record
+  are on chain.
+- BEM has no burn function; "burn" means sending to the burn address, which takes it out of use but does not lower
+  `totalSupply`.
+- TapeOut contracts other than circuits (factory, site store, TapeSend hub) still have admins. Circuits do not.
+- TAP standards are drafts.

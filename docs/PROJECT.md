@@ -1,47 +1,46 @@
-# Evermo — Project plan
+# Evermo — Build plan
 
-## Goal
+Deadline: 7 December 2026, 23:59 UTC. Goal: Evermo live on X Layer mainnet, with two working agents and one agent from
+another platform bought, used, proven and resold through real transactions.
 
-Ship a working Evermo on X Layer by 7 December 2026, 23:59 UTC: a DeWEB marketplace where at least two real agents can
-be bought, used, and resold, with every rule, tool and price checkable on chain.
+## Repository layout
 
-## MVP scope
+| Path | What it contains |
+|------|------------------|
+| `circuits/` | Rule definitions, NAND synthesis to TAP-02 netlists, a TAP-02 evaluator, exhaustive tests, tape-out script |
+| `contracts/` | Solidity: `AgentRegistry`, `AgentBudget`, `EvermoMarket`, TapeOut interfaces; tests on a mainnet fork of X Layer |
+| `service/` | Agent service: manifests (TAP-11/15/17), signed answers (TAP-13), receipts, track-record entries, TapeSend delivery, the demo agents |
+| `app/` | The DeWEB app: browse, agent pages, live circuit view, buy, budget, resell |
+| `verification/` | Scripts that reproduce the checks in `docs/VERIFICATION.md` |
+| `docs/` | Product, plan, circuits, claims, judging, verification |
 
-| Part | What it does | Where |
-|------|--------------|-------|
-| Agent identity | Each agent is a circuit NFT on X Layer with its own container (ERC-6551) | TapeOut |
-| Agent manifest | `/.well-known/tapeapi.json` in the agent's DeWEB site: endpoints and signer (TAP-11), pinned tool digest `toolsSha256` (TAP-15), AI price table (TAP-17) | DeWEB |
-| Budget circuit | Decides whether a payment from an agent's budget is allowed (see `CIRCUIT.md`) | TapeOut, X Layer |
-| Resale circuit | Checks each sale and returns the royalty split (see `CIRCUIT.md`) | TapeOut, X Layer |
-| Budget contract | Holds each agent's budget; calls the budget circuit with `eval` on chain before any payment; owner can withdraw any time | Solidity, X Layer |
-| Marketplace contract | List, buy with USDT0, resale; calls the resale circuit on chain and splits each payment instantly between seller, maker and Evermo, holding no balance | Solidity, X Layer |
-| Agent runtime | Off-chain service: checks the current owner on chain, checks the owner's signed delegation (TAP-11), calls the rules circuit, runs the agent, signs every answer with the circuit's inputs and result (TAP-13), writes AI usage receipts (TAP-17), delivers results | Node.js |
-| Inbox | Results and receipts sent over TapeSend from Evermo's own service container to the agent's container, readable by its current holder (owner publishes a key once); in-app inbox as fallback | TapeSend |
-| App | Marketplace, agent page (rules, tools, prices, history), My Agents, Inbox | DeWEB (uploaded to SiteRegistry by our own script), opened via the TapeKit gateway |
-| Demo agents | "Position Watch" (lending health alerts on X Layer) and "Token Risk Check" (contract, liquidity and holder checks on X Layer) | Runtime |
+## Contracts
 
-Not in the MVP: agents paying arbitrary third parties, agent-to-agent hiring, more than two demo agents.
+- **AgentRegistry**: registers an agent (any TapeOut circuit NFT) with its builder and manifest location; stores the
+  owner's operator permission (operator key, per-payment limit, daily limit, allowed payees, end date) keyed to the holder
+  at the time it was set, so it stops working when the agent changes hands; records track-record entries written by the
+  operator.
+- **AgentBudget**: holds each agent's budget in USDT0 or BEM; the current holder can deposit and withdraw at any time; the
+  operator can pay only after the budget circuit, called with `eval` on chain, allows the payment; every payment is
+  recorded in the track record.
+- **EvermoMarket**: escrowed listings in USDT0 or BEM; on purchase it calls the resale circuit with `eval`, then splits the
+  payment between seller, builder royalty and Evermo fee in the same transaction, sends half of the fee on BEM sales to the
+  burn address, and transfers the agent to the buyer.
 
-## User flows to demo
+No owner keys on the contracts: circuit IDs, processor, accepted tokens, fee and royalty rates and the fee recipient are set
+at deployment and cannot change.
 
-1. Maker publishes an agent: circuit + container created, manifest uploaded, listing created.
-2. Owner buys it with USDT0, signs a delegation (permission), tops up a budget.
-3. Agent sends a signed alert with an AI usage receipt to the owner's inbox.
-4. Anyone opens the agent page without a wallet and checks rules, tools and prices.
-5. Owner lists the agent; a second account buys it; the first owner's permission stops working.
+## Order of work
 
-## Build order
+1. Days 1–3: circuits and contracts, tested on a mainnet fork of X Layer against the real TapeOut contracts.
+2. Days 4–7: agent service, the two demo agents (Position Watch, Token Risk Check), receipts, track record, TapeSend
+   delivery, listing of an agent that runs on another platform.
+3. Days 8–10: the app on DeWEB: free browsing, track records, live circuit view, OKX Connect, buy, budget, resell.
+4. Days 11–14: mainnet tape-out and deployment, real buy → use → resell runs, judge pass, videos, submission.
 
-1. Done: every TapeOut step was tested on a local copy of X Layer (`docs/VERIFICATION.md`). First real step: create
-   Evermo's service circuit and container, and confirm with real transactions.
-2. Rules circuit: define, test every input, export for the canvas, tape out.
-3. Marketplace contract and tests.
-4. Agent runtime with TAP-11/13/15/17/18 and the two demo agents.
-5. DeWEB app and upload.
-6. End-to-end run on X Layer, demo video (under 3 minutes), submission.
+## Standards for the build
 
-## Repository standards
-
-- Clean, well-structured code; actively maintained open-source tools.
-- README written for both people and AI judges: what it is, the problem, and "do X → see Y" steps.
-- Every claim in `CLAIMS.md` points to evidence in the repo or on chain.
+- Real data only: everything shown in the app is read from X Layer or from signed service records. No placeholder or
+  sample data.
+- No developer wording in the app: plain words for people who use it.
+- Every claim in `docs/CLAIMS.md` gets evidence before it is marked built or live.

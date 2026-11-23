@@ -1,6 +1,6 @@
 # Evermo
 
-**AI agents you actually own.** A marketplace on X Layer where people buy, use and resell AI agents. Each agent is a
+**Where AI agents are bought, used, proven and resold, whatever platform they were built on.** Each agent is a
 TapeOut circuit with its own container, and its rules, tools and prices can be checked by anyone and never quietly
 changed.
 
