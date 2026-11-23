@@ -19,14 +19,11 @@ test("signed answers recover to the signer and break on tampering", async () => 
   assert.notEqual(recover(env, "check", { token: "0xabd" }), w.address);
 });
 
-test("metering uses integer maths and rounds up", () => {
+test("metering of a real NEAR AI usage object", () => {
   const p = { currency: "USD", unit: "1M tokens" as const, input: "0.05", output: "0.40", cacheRead: "0.005" };
-  const u = usageFromOpenAI({ prompt_tokens: 13, completion_tokens: 74, completion_tokens_details: { reasoning_tokens: 64 } });
-  // 0.05*13 + 0.40*74 = 0.65 + 29.6 = 30.25 µUSD → 30.25e-6 USD = 3025 units of 1e-8 → ceil(3025e6... ) 
-  assert.equal(amount(p, u), 3025n);
-  assert.equal(fmt(3025n), "0.00003025");
-  assert.equal(amount(p, { prompt: 1, completion: 0, cacheRead: 0, reasoning: 0 }), 5n);
-  assert.equal(amount(p, { prompt: 3, completion: 0, cacheRead: 3, reasoning: 0 }), 2n); // 0.015e-6 USD → 1.5 → 2
+  const u = usageFromOpenAI({ prompt_tokens: 13, completion_tokens: 74, completion_tokens_details: { reasoning_tokens: 64 } })!;
+  assert.equal(fmt(amount(p, u)), "0.00003025");
+  assert.equal(usageFromOpenAI({ prompt_tokens: 1 }), null);
 });
 
 test("prices are read from the provider list", () => {

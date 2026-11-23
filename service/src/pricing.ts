@@ -1,35 +1,45 @@
 // TAP-17 metering. Prices come from the provider's live model list, never hard-coded.
-export type Price = { currency: string; unit: "1M tokens"; input: string; output: string; cacheRead?: string; reasoning?: string };
-export type Usage = { prompt: number; completion: number; cacheRead: number; reasoning: number };
+export type Price = { currency: string; unit: "1M tokens"; input: string; output: string;
+  cacheRead?: string; cacheWrite?: string; cacheWrite1h?: string; reasoning?: string };
+/** TAP-17 §4.1 usage object. */
+export type Usage = { prompt_tokens: number; completion_tokens: number; total_tokens: number;
+  cache_read_tokens?: number; cache_write_tokens?: number; cache_write_1h_tokens?: number; reasoning_tokens?: number };
 
 const SCALE = 8; // 1e-8 units
 function units(dec: string): bigint {
-  if (!/^\d+(\.\d+)?$/.test(dec)) throw new Error("bad decimal " + dec);
+  if (!/^\d+(\.\d{1,8})?$/.test(dec)) throw new Error("bad decimal " + dec);
   const [i, f = ""] = dec.split(".");
-  if (f.length > SCALE) throw new Error("too many decimals " + dec);
   return BigInt(i) * 10n ** BigInt(SCALE) + BigInt((f + "0".repeat(SCALE)).slice(0, SCALE));
 }
+/** Exactly 8 fraction digits (TAP-17 §4.3). */
 export function fmt(u: bigint): string {
   const s = u.toString().padStart(SCALE + 1, "0");
-  const r = (s.slice(0, -SCALE) + "." + s.slice(-SCALE)).replace(/\.?0+$/, "");
-  return r || "0";
+  return s.slice(0, -SCALE) + "." + s.slice(-SCALE);
 }
 
-/** Amount in 1e-8 currency units: A = ceil(S / 1e6). Integer arithmetic only. */
+/** A = ceil(S / 1e6) in 1e-8 units, exact integers only. */
 export function amount(p: Price, u: Usage): bigint {
-  const inP = units(p.input), outP = units(p.output);
-  const crP = p.cacheRead !== undefined ? units(p.cacheRead) : inP;
-  const rsP = p.reasoning !== undefined ? units(p.reasoning) : outP;
-  const S = inP * BigInt(u.prompt - u.cacheRead) + crP * BigInt(u.cacheRead)
-    + outP * BigInt(u.completion - u.reasoning) + rsP * BigInt(u.reasoning);
+  const B = (n?: number) => BigInt(n ?? 0);
+  const cr = B(u.cache_read_tokens), cw = B(u.cache_write_tokens), cw1h = B(u.cache_write_1h_tokens);
+  const rs = p.reasoning !== undefined ? B(u.reasoning_tokens) : 0n;
+  const inP = units(p.input), crP = p.cacheRead ? units(p.cacheRead) : inP;
+  const cwP = p.cacheWrite ? units(p.cacheWrite) : inP, cw1hP = p.cacheWrite1h ? units(p.cacheWrite1h) : cwP;
+  let S = inP * (B(u.prompt_tokens) - cr - cw) + crP * cr + cwP * (cw - cw1h) + cw1hP * cw1h
+    + units(p.output) * (B(u.completion_tokens) - rs);
+  if (p.reasoning !== undefined) S += units(p.reasoning) * rs;
   return (S + 999_999n) / 1_000_000n;
 }
 
-export function usageFromOpenAI(x: any): Usage {
-  const n = (v: unknown) => (Number.isInteger(v) && (v as number) >= 0 ? (v as number) : 0);
-  if (!x || !Number.isInteger(x.prompt_tokens) || !Number.isInteger(x.completion_tokens)) throw new Error("no usage");
-  return { prompt: x.prompt_tokens, completion: x.completion_tokens,
-    cacheRead: n(x.prompt_tokens_details?.cached_tokens), reasoning: n(x.completion_tokens_details?.reasoning_tokens) };
+/** OpenAI chat usage → TAP-17 usage, or null when counts are missing or inconsistent. */
+export function usageFromOpenAI(x: any): Usage | null {
+  const int = (v: unknown) => Number.isSafeInteger(v) && (v as number) >= 0;
+  if (!x || !int(x.prompt_tokens) || !int(x.completion_tokens)) return null;
+  const u: Usage = { prompt_tokens: x.prompt_tokens, completion_tokens: x.completion_tokens,
+    total_tokens: x.prompt_tokens + x.completion_tokens };
+  const cr = x.prompt_tokens_details?.cached_tokens, rs = x.completion_tokens_details?.reasoning_tokens;
+  if (int(cr) && cr > 0) { if (cr > u.prompt_tokens) return null; u.cache_read_tokens = cr; }
+  if (int(rs) && rs > 0) { if (rs > u.completion_tokens) return null; u.reasoning_tokens = rs; }
+  return u;
 }
 
 /** NEAR AI /v1/models → TAP-17 prices. Uses textPricing (decimal strings, USD per 1M tokens, default tier). */
