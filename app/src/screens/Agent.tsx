@@ -12,8 +12,10 @@ import { Skel, Notice, AddrLink } from "../ui/parts";
 import { circuits } from "../words";
 import { Buy } from "../flows/Buy";
 import { SwitchOn } from "../flows/SwitchOn";
-import { Budget, Sell, Watch, Cancel } from "../flows/Manage";
+import { Budget, Sell, Watch, Cancel, Stop } from "../flows/Manage";
+import { registry } from "../chain/read";
 import { explain } from "../chain/wallet";
+import { getLang } from "../i18n";
 
 const LABEL: Record<string, string> = { account: "Account", token: "Token address", warnBelow: "Warn below" };
 const HINT: Record<string, string> = { account: "An address with a lending position on Aave on X Layer", token: "A token on X Layer", warnBelow: "Health level, for example 1.2" };
@@ -25,7 +27,8 @@ export function Agent({ id }: { id: string }) {
   const [tools, setTools] = useState<{ tools: any[]; matches: boolean } | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [err, setErr] = useState("");
-  const [sheet, setSheet] = useState<"" | "buy" | "on" | "budget" | "sell" | "watch" | "cancel">("");
+  const [sheet, setSheet] = useState<"" | "buy" | "on" | "budget" | "sell" | "watch" | "cancel" | "stop">("");
+  const [stopped, setStopped] = useState<boolean | null>(null);
   const [params, setParams] = useState<Record<string, string>>({});
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [running, setRunning] = useState(false);
@@ -35,6 +38,7 @@ export function Agent({ id }: { id: string }) {
   const refresh = useCallback(async () => {
     const x = await loadAgent(id); setA(x);
     history(id).then(setItems).catch(() => {});
+    registry().permissionOf(id).then((p: any) => setStopped(p.operator.toLowerCase() !== dep().operator.toLowerCase() || Number(p.expiresAt) <= Date.now() / 1000)).catch(() => setStopped(null));
     const mm = await manifest(x.address); setM(mm);
     if (mm) toolsCheck(mm).then(setTools);
   }, [id]);
@@ -58,7 +62,7 @@ export function Agent({ id }: { id: string }) {
     setRunning(true); setRunErr(""); setAnswer(null);
     try {
       const p: Record<string, string> = {};
-      for (const [k, t] of Object.entries(method.params)) { const v = (params[k] ?? "").trim(); if (v) p[k] = v; else if (!t.endsWith("?")) throw new Error(`Enter the ${(LABEL[k] ?? k).toLowerCase()}.`); }
+      for (const [k, t] of Object.entries(method.params)) { if (k === "lang") { p.lang = getLang(); continue; } const v = (params[k] ?? "").trim(); if (v) p[k] = v; else if (!t.endsWith("?")) throw new Error(`Enter the ${(LABEL[k] ?? k).toLowerCase()}.`); }
       let sign: ((d: Uint8Array) => Promise<string>) | undefined;
       if (paid) { const sg = await ask(); if (!sg) return; sign = (d) => sg.signMessage(d); }
       setAnswer(await run(m, a.agentId, method.name, p, sign));
@@ -76,14 +80,14 @@ export function Agent({ id }: { id: string }) {
         <div className="stack" style={{ gap: 24, minWidth: 0 }}>
           <header className="stack" style={{ gap: 8 }}>
             <div className="row" style={{ flexWrap: "wrap" }}>
-              <h1 className="title">{name}</h1>
+              <h1 className="title" data-notr={a.name ? "" : undefined}>{name}</h1>
               {a.listing ? <span className="pill brand">For sale</span> : isOwner ? <span className="pill ok">Yours</span> : null}
               {!a.switchedOn && <span className="pill">Not switched on</span>}
             </div>
             <p className="muted" style={{ margin: 0 }}>{a.description ?? method?.description ?? "This agent's description is not available right now."}</p>
           </header>
 
-          <section className="card pad">
+          <section className="card pad" data-tour="record">
             <div className="label" style={{ marginBottom: 12 }}>Track record</div>
             <div className="row" style={{ gap: 28, flexWrap: "wrap", alignItems: "flex-end" }}>
               <div><div className="big num"><Roll>{String(a.record.work)}</Roll></div><div className="label">jobs done</div></div>
@@ -98,7 +102,7 @@ export function Agent({ id }: { id: string }) {
               <div className="between"><div className="h2">{isOwner ? "Use it" : "Try it"}</div>
                 {!isOwner && <span className="pill">Free, not recorded</span>}</div>
               {blocked ? <Notice tone="no"><Warning size={16} style={{ verticalAlign: -3 }} /> This agent's tools have changed since its owner approved them. Evermo will not run it until the owner approves them again.</Notice> : <>
-                {Object.entries(method.params).map(([k, t]) => (
+                {Object.entries(method.params).filter(([k]) => k !== "lang").map(([k, t]) => (
                   <label key={k} className="field"><span className="label">{LABEL[k] ?? k}{t.endsWith("?") ? " (optional)" : ""}</span>
                     <input value={params[k] ?? ""} placeholder={k === "warnBelow" ? "1.2" : "0x…"} onChange={(e) => setParams({ ...params, [k]: e.target.value })} />
                     {HINT[k] && <span className="hint">{HINT[k]}</span>}</label>))}
@@ -116,7 +120,7 @@ export function Agent({ id }: { id: string }) {
             </section>
           )}
 
-          <section className="card pad stack">
+          <section className="card pad stack" data-tour="circuit">
             <div className="between"><div className="h2">How its budget is decided</div>{lastPay && <span className={`pill ${lastPay.data.allowed ? "ok" : "no"}`}>Last: {lastPay.data.allowed ? "allowed" : "refused"}</span>}</div>
             <p className="muted small" style={{ margin: 0 }}>Every payment from this agent's budget goes through this check on X Layer first. {lastPay ? `Shown with the last payment, ${money(lastPay.data.amount, lastPay.data.token)}.` : "No payment yet."}</p>
             <CircuitView id={dep().budgetCircuitId} bits={lastPay ? parseInt(String(lastPay.data.inputs), 16) : null} labels={circuits.budget.inputs} outLabels={circuits.budget.outputs} />
@@ -133,7 +137,7 @@ export function Agent({ id }: { id: string }) {
         </div>
 
         <aside className="stack" style={{ position: "sticky", top: 88, gap: 16 }}>
-          <div className="card pad stack">
+          <div className="card pad stack" data-tour="actions">
             {a.listing ? <>
               <div><div className="label">Price</div><div className="big num">{money(a.listing.price, a.listing.token)}</div></div>
               <div className="hint">Open until {dateOf(a.listing.expiresAt)}</div>
@@ -145,6 +149,8 @@ export function Agent({ id }: { id: string }) {
               <button className="btn wide" onClick={() => setSheet("budget")}>Budget</button>
               {m?.methods.some((x) => x.name === "health") && <button className="btn wide" disabled={!a.switchedOn} onClick={() => setSheet("watch")}>Watch a position</button>}
               <button className="btn wide" onClick={() => setSheet("sell")}>Sell</button>
+              {stopped !== null && a.switchedOn && !stopped && <button className="btn quiet wide" style={{ color: "var(--no)" }} onClick={() => setSheet("stop")}>Stop the agent</button>}
+              {a.switchedOn && stopped && <span className="pill no" style={{ justifySelf: "start" }}>Stopped</span>}
             </> : <>
               <div className="h2">Not for sale right now</div>
               <div className="hint">Its owner can list it at any time. Its record stays with it.</div>
@@ -167,6 +173,7 @@ export function Agent({ id }: { id: string }) {
       {sheet === "budget" && <Budget a={a} onClose={() => setSheet("")} onChange={refresh} />}
       {sheet === "sell" && <Sell a={a} onClose={() => setSheet("")} onChange={refresh} />}
       {sheet === "watch" && <Watch a={a} onClose={() => setSheet("")} />}
+      {sheet === "stop" && <Stop a={a} onClose={() => setSheet("")} onChange={refresh} />}
       {sheet === "cancel" && <Cancel a={a} onClose={() => setSheet("")} onChange={refresh} />}
     </div>
   );

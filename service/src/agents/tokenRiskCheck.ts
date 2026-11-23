@@ -7,11 +7,11 @@ import { BadInput } from "./positionWatch.ts";
 export const def: AgentDef = {
   name: "Token Risk Check",
   description: "Checks a token on X Layer: its contract, who controls it, its liquidity and its trading.",
-  methods: [{ name: "check", priceBEM: "0", params: { token: "address" }, returns: "report",
+  methods: [{ name: "check", priceBEM: "0", params: { token: "address", lang: "string?" }, returns: "report",
     description: "Checks a token on X Layer: who controls it, its liquidity and its trading, with a short summary in plain words" }],
   tools: [{ name: "check", title: "Token check",
     description: "Read a token's contract, owner controls, liquidity pools and trading on X Layer.",
-    inputSchema: { type: "object", properties: { token: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" } }, required: ["token"], additionalProperties: false } }],
+    inputSchema: { type: "object", properties: { token: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" }, lang: { type: "string", enum: ["en", "zh"] } }, required: ["token"], additionalProperties: false } }],
 };
 
 const EIP1967_IMPL = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
@@ -20,12 +20,21 @@ const GT = "https://api.geckoterminal.com/api/v2/networks/x-layer";
 async function tryCall<T>(c: Contract, f: string, block: number): Promise<T | null> {
   try { return await (c as any)[f]({ blockTag: block }); } catch { return null; }
 }
+// GeckoTerminal's free API allows about 30 calls a minute: answers are cached for two minutes and busy replies retried.
+const cache = new Map<string, { at: number; v: any }>();
 async function gecko(path: string): Promise<any | null> {
-  const r = await fetch(GT + path, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(15000) });
-  if (r.status === 404) return null;
-  if (!r.ok) throw new Error("market data unavailable (" + r.status + ")");
-  return r.json();
+  const c = cache.get(path);
+  if (c && Date.now() - c.at < 120_000) return c.v;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const r = await fetch(GT + path, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(15000) });
+    if (r.status === 404) { cache.set(path, { at: Date.now(), v: null }); return null; }
+    if (r.ok) { const v = await r.json(); cache.set(path, { at: Date.now(), v }); return v; }
+    if (r.status !== 429 && r.status < 500) break;
+    await new Promise((res) => setTimeout(res, 1500 * (attempt + 1)));
+  }
+  throw new MarketBusy();
 }
+class MarketBusy extends Error {}
 
 export async function facts(params: any) {
   if (!isAddress(params?.token)) throw new BadInput("token must be an address");
@@ -41,7 +50,9 @@ export async function facts(params: any) {
     tryCall<bigint>(c, "totalSupply", block), tryCall<string>(c, "owner", block), tryCall<boolean>(c, "paused", block),
     provider.getStorage(token, EIP1967_IMPL, block)]);
   const impl = BigInt(implSlot) === 0n ? null : getAddress("0x" + implSlot.slice(26));
-  const [info, pools] = await Promise.all([gecko(`/tokens/${token.toLowerCase()}/info`), gecko(`/tokens/${token.toLowerCase()}/pools?page=1`)]);
+  let info: any = null, pools: any = null, marketOk = true;
+  try { [info, pools] = await Promise.all([gecko(`/tokens/${token.toLowerCase()}/info`), gecko(`/tokens/${token.toLowerCase()}/pools?page=1`)]); }
+  catch (e) { if (!(e instanceof MarketBusy)) throw e; marketOk = false; }
   const list = (pools?.data ?? []).map((p: any) => ({
     name: p.attributes.name, address: p.attributes.address, dex: p.relationships?.dex?.data?.id ?? null,
     liquidityUsd: p.attributes.reserve_in_usd, volume24hUsd: p.attributes.volume_usd?.h24 ?? null, createdAt: p.attributes.pool_created_at,
@@ -58,11 +69,11 @@ export async function facts(params: any) {
       owner: owner === null ? null : owner, ownerRenounced: owner === ZeroAddress,
       pausable: paused !== null, ...(paused !== null ? { paused } : {}),
     },
-    market: {
+    market: !marketOk ? null : {
       pools: list.length, totalLiquidityUsd: liq.toFixed(2), largestPools: list.slice(0, 5),
       flaggedHoneypot: a?.is_honeypot === true ? true : a?.is_honeypot === false ? false : null,
       ...(a?.holders?.count != null ? { holders: a.holders.count } : {}),
     },
-    sources: { chain: "X Layer at block " + block, market: "GeckoTerminal" },
+    sources: marketOk ? { chain: "X Layer at block " + block, market: "GeckoTerminal" } : { chain: "X Layer at block " + block },
   };
 }

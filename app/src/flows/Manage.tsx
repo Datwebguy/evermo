@@ -133,3 +133,24 @@ export function Cancel({ a, onClose, onChange }: { a: AgentCard; onClose: () => 
     </Sheet>
   );
 }
+
+/** Ends Evermo's permission at once. The budget circuit then refuses every payment until the owner switches the agent on again. */
+export function Stop({ a, onClose, onChange }: { a: AgentCard; onClose: () => void; onChange: () => void }) {
+  const { ask } = useWallet();
+  const s = useStep();
+  const [done, setDone] = useState("");
+  return (
+    <Sheet title="Stop this agent now?" onClose={onClose}>
+      {done ? <><Notice tone="ok">Stopped. No payment can leave the budget until you switch the agent on again.</Notice><TxLink tx={done} />
+        <button className="btn primary wide" onClick={onClose}>Done</button></> : <>
+        <p className="muted" style={{ margin: 0 }}>Evermo's permission ends at once. The rule check will refuse every payment from the budget until you switch the agent on again. Your budget stays in the agent; you can take it out.</p>
+        {s.error && <div className="error">{s.error}</div>}
+        <button className="btn primary wide" style={{ background: "var(--no)", borderColor: "var(--no)" }} disabled={!!s.busy} onClick={async () => {
+          const sg = await ask(); if (!sg) return;
+          const r = await s.go("stop", async () => confirm(await (registry().connect(sg) as Contract).setPermission(a.agentId, "0x0000000000000000000000000000000000000000", 0)));
+          if (r) { setDone(r.hash); onChange(); }
+        }}>{s.busy ? "Waiting…" : "Stop now"}</button>
+      </>}
+    </Sheet>
+  );
+}

@@ -18,7 +18,7 @@ const isAddr = (v: unknown) => typeof v === "string" && /^0x[0-9a-fA-F]{40}$/.te
 const HIDE = new Set(["summary", "summaryReceipt", "sources", "largestPools"]);
 
 function Facts({ obj }: { obj: Record<string, unknown> }) {
-  const flat = Object.entries(obj).filter(([k, v]) => !HIDE.has(k) && (v === null || typeof v !== "object"));
+  const flat = Object.entries(obj).filter(([k, v]) => !HIDE.has(k) && !(k === "market" && v === null) && (v === null || typeof v !== "object"));
   const nested = Object.entries(obj).filter(([k, v]) => !HIDE.has(k) && v && typeof v === "object" && !Array.isArray(v));
   return <>
     {flat.length > 0 && <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "minmax(130px,1fr) auto", gap: "8px 16px" }}>
@@ -33,7 +33,7 @@ export function Result({ a }: { a: Answer }) {
   const e = a.env;
   return (
     <div className="card pad stack enter" style={{ boxShadow: "none" }}>
-      <div className="between">
+      <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
         {a.verified ? <span className="pill ok"><SealCheck size={14} weight="fill" />Signed by this agent</span>
           : <span className="pill no"><Warning size={14} weight="fill" />Signature does not match</span>}
         {a.payment && (a.payment.allowed
@@ -41,12 +41,13 @@ export function Result({ a }: { a: Answer }) {
           : <span className="pill no">Refused by the budget rules</span>)}
       </div>
       {e.ok ? <>
-        {typeof (e.result as any)?.summary === "string" && <p style={{ margin: 0, fontSize: 16, fontWeight: 550 }}>{(e.result as any).summary}</p>}
+        {typeof (e.result as any)?.summary === "string" && <p data-notr style={{ margin: 0, fontSize: 16, fontWeight: 550 }}>{(e.result as any).summary}</p>}
         <Facts obj={e.result as any} />
         {Array.isArray((e.result as any)?.market?.largestPools) && (e.result as any).market.largestPools.length > 0 && (
           <div className="stack" style={{ gap: 6 }}><div className="label">Largest pools</div>
-            {(e.result as any).market.largestPools.map((p: any) => <div key={p.address} className="between small"><span>{p.name}</span><span className="num muted">${Number(p.liquidityUsd).toLocaleString("en-US", { maximumFractionDigits: 0 })}</span></div>)}
+            {(e.result as any).market.largestPools.map((p: any) => <div key={p.address} className="between small"><span data-notr>{p.name}</span><span className="num muted">${Number(p.liquidityUsd).toLocaleString("en-US", { maximumFractionDigits: 0 })}</span></div>)}
           </div>)}
+        {(e.result as any)?.market === null && <div className="hint">Market data is busy right now; the contract facts above are complete. Try again in a minute for liquidity and trading.</div>}
         {(e.result as any)?.sources && <div className="hint">Sources: {Object.values((e.result as any).sources).join(" · ")}</div>}
       </> : <div className="error">{e.error?.message}</div>}
       <div className="row small" style={{ flexWrap: "wrap" }}>

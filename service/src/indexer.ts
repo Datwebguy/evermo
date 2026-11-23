@@ -8,6 +8,7 @@ export const abis = {
   registry: new Interface([
     "event AgentRegistered(bytes32 indexed agentId, address indexed circuits, uint256 indexed tokenId, address builder, string manifest)",
     "event ManifestUpdated(bytes32 indexed agentId, string manifest)",
+    "event PermissionSet(bytes32 indexed agentId, address indexed grantedBy, address indexed operator, uint64 expiresAt)",
     "event Recorded(bytes32 indexed agentId, uint8 indexed kind, bytes32 ref, uint256 amount, address token)",
   ]),
   budget: new Interface([

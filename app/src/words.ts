@@ -1,6 +1,6 @@
 // How chain events read on screen.
 import type { Item } from "./service/api";
-import { money } from "./chain/format";
+import { money, dateOf } from "./chain/format";
 
 export type Line = { text: string; tone: "ok" | "no" | "brand" | "muted"; kind: string };
 export function describe(it: Item): Line | null {
@@ -11,6 +11,9 @@ export function describe(it: Item): Line | null {
     case "PaymentDecided": return d.allowed
       ? { text: `Rules allowed a payment of ${money(d.amount, d.token)}`, tone: "ok", kind: "pay" }
       : { text: `Rules refused a payment of ${money(d.amount, d.token)}`, tone: "no", kind: "refuse" };
+    case "PermissionSet": return /^0x0+$/.test(String(d.operator)) || Number(d.expiresAt) * 1000 <= Date.now()
+      ? { text: "Permission ended by the owner", tone: "no", kind: "stop" }
+      : { text: `Owner let Evermo act for it until ${dateOf(Number(d.expiresAt))}`, tone: "muted", kind: "perm" };
     case "Deposited": return { text: `Budget topped up by ${money(d.amount, d.token)}`, tone: "muted", kind: "deposit" };
     case "Withdrawn": return { text: `${money(d.amount, d.token)} taken out of the budget`, tone: "muted", kind: "withdraw" };
     case "Listed": return { text: `Put up for sale at ${money(d.price, d.token)}`, tone: "brand", kind: "list" };

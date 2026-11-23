@@ -8,7 +8,7 @@ export function AgentTile({ a, me }: { a: AgentCard; me?: string | null }) {
     <a href={`#/agent/${a.agentId}`} className="card pad enter" style={{ textDecoration: "none", display: "grid", gap: 14 }}>
       <div className="between" style={{ alignItems: "flex-start" }}>
         <div style={{ minWidth: 0 }}>
-          <div className="h2">{a.name ?? `Agent ${short(a.agentId)}`}</div>
+          <div className="h2" data-notr={a.name ? "" : undefined}>{a.name ?? `Agent ${short(a.agentId)}`}</div>
           <div className="muted small" style={{ marginTop: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {a.description ?? "This agent's description is not available right now."}</div>
         </div>

@@ -123,6 +123,17 @@ Rules taken from the Stageshow skill (MIT, Benji Taylor) and applied to a real p
 Stageshow has no 3D. The circuit view is a 2D animated diagram drawn from the real netlist, which keeps the site small
 enough to store on chain.
 
+### Languages, themes and the tour
+
+- English and Chinese. The language follows the device the first time and can be switched at any time; the choice is
+  remembered on that device. Our own agents answer in the chosen language. Names and descriptions written by other
+  builders are shown as they wrote them.
+- Light and dark, following the device until the person picks one.
+- A five-step tour on first visit, which can be skipped or replayed: the agent list, the live feed, an agent's track
+  record, its budget check, and the actions to try, buy and resell. Each step moves to the page its feature is on and
+  lights it up.
+- The owner can stop an agent at once. The budget check then refuses every payment until the agent is switched on again.
+
 ## 5. Tech stack
 
 | Part | Choice | Why |

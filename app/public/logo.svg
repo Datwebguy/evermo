@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Evermo">
+  <defs>
+    <linearGradient id="evA" x1="6" y1="14" x2="34" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB04A"/><stop offset="1" stop-color="#E8501A"/>
+    </linearGradient>
+    <linearGradient id="evB" x1="58" y1="14" x2="30" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B07648"/><stop offset="1" stop-color="#4A2A16"/>
+    </linearGradient>
+    <clipPath id="evTop"><rect x="0" y="0" width="64" height="32"/></clipPath>
+  </defs>
+  <!-- Two links woven together: a ring (the agent, which goes on) and a chip (its circuit, which holds the rules). -->
+  <rect x="27" y="17" width="30" height="30" rx="9" fill="none" stroke="url(#evB)" stroke-width="8"/>
+  <circle cx="23" cy="32" r="15" fill="none" stroke="url(#evA)" stroke-width="8"/>
+  <g clip-path="url(#evTop)"><rect x="27" y="17" width="30" height="30" rx="9" fill="none" stroke="url(#evB)" stroke-width="8"/></g>
+  <circle cx="47.5" cy="32" r="3.6" fill="#FFC56B"/>
+</svg>

@@ -10,11 +10,11 @@ const MAX = (1n << 256n) - 1n;
 export const def: AgentDef = {
   name: "Position Watch",
   description: "Watches a lending position on Aave on X Layer and warns before it can be liquidated.",
-  methods: [{ name: "health", priceBEM: "0", params: { account: "address", warnBelow: "string?" }, returns: "health",
+  methods: [{ name: "health", priceBEM: "0", params: { account: "address", warnBelow: "string?", lang: "string?" }, returns: "health",
     description: "Checks a lending position on Aave on X Layer: collateral, debt and health, and warns before it can be liquidated" }],
   tools: [{ name: "health", title: "Lending health",
     description: "Read the collateral, debt and health factor of an Aave account on X Layer.",
-    inputSchema: { type: "object", properties: { account: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" }, warnBelow: { type: "string", pattern: "^[0-9]+(\\.[0-9]{1,4})?$" } }, required: ["account"], additionalProperties: false } }],
+    inputSchema: { type: "object", properties: { account: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" }, warnBelow: { type: "string", pattern: "^[0-9]+(\\.[0-9]{1,4})?$" }, lang: { type: "string", enum: ["en", "zh"] } }, required: ["account"], additionalProperties: false } }],
 };
 
 const dec = (v: bigint, d: number, keep: number) => {
@@ -29,7 +29,8 @@ export async function health(params: any) {
   const block = await provider.getBlockNumber();
   const [collateral, debt, available, , , hf] = await pool.getUserAccountData(account, { blockTag: block });
   const warnWad = BigInt(warn.split(".")[0]) * 10n ** 18n + BigInt((warn.split(".")[1] ?? "").padEnd(18, "0"));
-  const hasDebt = debt > 0n;
+  const hasDebt = debt > 0n, zh = params.lang === "zh";
+  if (params.lang !== undefined && params.lang !== "en" && params.lang !== "zh") throw new BadInput("lang must be en or zh");
   return {
     block,
     account,
@@ -39,10 +40,12 @@ export async function health(params: any) {
     healthFactor: hasDebt && hf !== MAX ? dec(hf, 18, 4) : null,
     warnBelow: warn,
     atRisk: hasDebt && hf < warnWad,
-    summary: !hasDebt ? (collateral > 0n ? "No borrowing on this account, so it cannot be liquidated." : "This account has no position on Aave on X Layer.")
-      : hf < 10n ** 18n ? "This position can be liquidated now."
-      : hf < warnWad ? `Health is ${dec(hf, 18, 2)}, below your warning level of ${warn}.`
-      : `Health is ${dec(hf, 18, 2)}, above your warning level of ${warn}.`,
+    summary: !hasDebt
+      ? (collateral > 0n ? (zh ? "该账户没有借款，不会被清算。" : "No borrowing on this account, so it cannot be liquidated.")
+        : (zh ? "该账户在 X Layer 的 Aave 上没有仓位。" : "This account has no position on Aave on X Layer."))
+      : hf < 10n ** 18n ? (zh ? "该仓位现在可能被清算。" : "This position can be liquidated now.")
+      : hf < warnWad ? (zh ? `健康度为 ${dec(hf, 18, 2)}，低于你的预警线 ${warn}。` : `Health is ${dec(hf, 18, 2)}, below your warning level of ${warn}.`)
+      : (zh ? `健康度为 ${dec(hf, 18, 2)}，高于你的预警线 ${warn}。` : `Health is ${dec(hf, 18, 2)}, above your warning level of ${warn}.`),
   };
 }
 
