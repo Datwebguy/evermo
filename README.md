@@ -31,6 +31,7 @@ Idea and plan. Claims and their evidence: `docs/CLAIMS.md`.
 |------|----------|
 | `docs/PRODUCT.md` | Users, problem, how it is used, use cases, revenue, limits |
 | `docs/PROJECT.md` | MVP scope, demo flows, build order |
+| `docs/APP.md` | The app: MVP, user journeys, screens, look and motion, stack, data, APIs, architecture |
 | `docs/CIRCUIT.md` | Agent circuits, the budget circuit and the resale circuit |
 | `docs/JUDGING.md` | Hackathon requirements, criteria, self-assessment, AI-judge preparation |
 | `docs/CLAIMS.md` | Every claim with its evidence |
