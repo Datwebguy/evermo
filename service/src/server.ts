@@ -14,6 +14,7 @@ import { containerOf, holderOf, inboxKey, writer } from "./chain.ts";
 import { seal, endpointID } from "./tapesend.ts";
 import * as pw from "./agents/positionWatch.ts";
 import * as trc from "./agents/tokenRiskCheck.ts";
+import { verifyAgentAt } from "./verify.ts";
 
 const cfg = deployment();
 const db = stores(cfg.dataDir);
@@ -204,6 +205,12 @@ const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? "/", "http://x");
     if (req.method === "OPTIONS") return send(res, 204, "", { "access-control-allow-headers": `content-type, authorization, ${OWNER_HEADER}`, "access-control-allow-methods": "GET, POST" });
+    if (req.method === "GET" && url.pathname === "/check-agent") {
+      const at = url.searchParams.get("url") ?? "";
+      if (!/^https:\/\/[^\s]+$/.test(at)) return send(res, 400, { error: "Give the agent's https address" });
+      const c = await verifyAgentAt(at, { chainId: chain.id, hub: chain.hub, holderOf, containerOf });
+      return send(res, 200, { ok: c.ok, problems: c.problems, name: c.manifest?.name ?? null, circuits: c.manifest?.circuits ?? null, tokenId: c.manifest?.tokenId ?? null });
+    }
     if (url.pathname === "/health") return send(res, 200, { ok: true, agents: [...agents.keys()] });
     const m = url.pathname.match(/^\/a\/([a-z0-9-]+)(\/.*)?$/);
     const a = m && agents.get(m[1]);

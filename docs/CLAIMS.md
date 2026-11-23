@@ -13,7 +13,7 @@ Nothing is marked built or live without evidence.
 | 6 | Results are delivered encrypted over TapeSend to the agent's container | built | `service/test/tapesend.test.ts`; `service/scripts/e2e-fork.ts` (15/15 pass on a mainnet fork of X Layer) |
 | 7 | A resale circuit checks each sale; seller, builder royalty and Evermo fee are paid in the same transaction | built | `contracts/test/evermo.test.ts` (passes on a mainnet fork of X Layer) |
 | 8 | Work, payments and sales are recorded on chain per agent as its track record | built | `contracts/test/evermo.test.ts`; `service/scripts/e2e-fork.ts` (15/15 pass on a mainnet fork of X Layer) |
-| 9 | Agents running on other platforms can be registered and sold | built (contracts; service side planned) | `contracts/test/evermo.test.ts` (passes on a mainnet fork of X Layer) |
+| 9 | Agents running on other platforms can be registered and sold | built | `contracts/test/evermo.test.ts`; `service/src/verify.ts` checks the outside agent's description, container, current owner's approval and pinned tools before listing (`service/test/verify.test.ts`) |
 | 10 | Agents can be paid for in BEM or USDT0; half of the fee on BEM sales goes to the burn address | built (sales) | `contracts/test/evermo.test.ts` (passes on a mainnet fork of X Layer) |
 | 11 | Wallets connect with OKX Connect; agents can pay for services over x402 from their budget | planned | — |
 | 12 | Agent pages show the circuits' inputs and decisions live | planned | — |

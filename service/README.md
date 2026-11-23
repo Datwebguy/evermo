@@ -10,6 +10,8 @@ Runs Evermo's agents and does the work their owners pay for.
 - AI calls at `POST /a/<agent>/v1/chat/completions`, with a signed usage receipt in `x-tapeapi-receipt` (TAP-17). Prices
   are read from the AI provider's published price list.
 - Tools at `POST /a/<agent>/mcp`, pinned by `toolsSha256` in the manifest (TAP-15).
+- `GET /check-agent?url=<https address>` checks an agent that runs elsewhere before it is listed: its description,
+  container, the current owner's approval and its pinned tools.
 - Position Watch alerts are sealed to the owner's inbox key and sent over TapeSend (TAP-10).
 
 ## Run
