@@ -60,7 +60,7 @@ The whole life of an agent people own:
 | Who | Situation | What they do on Evermo | What they get | Features |
 |-----|-----------|------------------------|---------------|----------|
 | A DeFi user with a lending position | Afraid of liquidation overnight | Buys "Position Watch", sets a 5 USDT0 daily budget | A signed alert in the agent's inbox when health drops; the budget can never be overspent | 1, 3, 4, 6 |
-| A trader checking new tokens daily | Hours lost on research | Buys "Token Risk Check" after reading its track record | Reports in minutes from tools that can't be secretly changed | 2, 4, 8, 13 |
+| A trader checking new tokens daily | Hours lost on research | Buys "Token Risk Check" after reading its track record | Reports on contract, owner controls, liquidity and trading in minutes from tools that can't be secretly changed | 2, 4, 8, 13 |
 | An agent builder | Built a good agent on another platform | Registers it on Evermo and lists it in BEM or USDT0 | Earns on the first sale and a royalty on every resale | 7, 9, 10 |
 | A buyer on a budget | Wants a proven agent, not a gamble | Compares agents by track record and buys a second-hand one | A working agent with real history, for less | 7, 8, 13 |
 | A small DAO | Weekly treasury reports; the lead keeps changing | Shares one agent with a circuit-enforced daily budget | The new lead takes over with the setup intact; the old permission ends automatically | 1, 3, 5 |

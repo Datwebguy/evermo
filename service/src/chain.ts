@@ -2,7 +2,7 @@
 import { Contract, JsonRpcProvider, Wallet, getBytes, hexlify } from "ethers";
 import { chain } from "./config.ts";
 
-export const provider = new JsonRpcProvider(chain.rpc, chain.id, { staticNetwork: true });
+export const provider = new JsonRpcProvider(chain.rpc, chain.id, { staticNetwork: true, cacheTimeout: -1 });
 
 export const OPENER = "0x536adD8F30f03b69f6fbF29d425A816A0dC50106";
 const opener = new Contract(OPENER, ["function accountOf(address,uint256) view returns (address)", "function isOpened(address,uint256) view returns (bool)"], provider);
