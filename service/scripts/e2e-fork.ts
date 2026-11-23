@@ -62,6 +62,7 @@ async function main() {
     return o.accountOf(cpuAddr, id) as Promise<string>;
   }
 
+  const deployBlock = await p.getBlockNumber();
   const deployer = await funded(), owner = await funded(), buyer = await funded(), operator = await funded(), payee = Wallet.createRandom();
   const budgetC = circuit("budget"), resaleC = circuit("resale");
   const budgetId = await tapeout(deployer, budgetC), resaleId = await tapeout(deployer, resaleC);
@@ -77,7 +78,7 @@ async function main() {
   const senderTok = await tapeout(operator, budgetC);
   const senderContainer = await openContainer(operator, senderTok);
   const reg = registry.connect(owner) as any;
-  await (await reg.register(cpuAddr, agentTok, "")).wait();
+  await (await reg.register(cpuAddr, agentTok, `http://127.0.0.1:${PORT}/a/position-watch`)).wait();
   const agentId = await registry.agentIdOf(cpuAddr, agentTok);
   check("agent registered with its own circuit and container", (await registry.holderOf(agentId)) === owner.address, container);
 
@@ -114,7 +115,7 @@ async function main() {
   writeFileSync(agentsFile, JSON.stringify([
     { slug: "position-watch", kind: "positionWatch", circuits: cpuAddr, tokenId: agentTok.toString(), priceUsdt: "0.01", sender: { circuits: cpuAddr, tokenId: senderTok.toString() } },
   ]));
-  const env = { ...process.env, XLAYER_RPC_URL: RPC, REGISTRY_ADDRESS: await registry.getAddress(), BUDGET_ADDRESS: await budget.getAddress(),
+  const env = { ...process.env, XLAYER_RPC_URL: RPC, REGISTRY_ADDRESS: await registry.getAddress(), BUDGET_ADDRESS: await budget.getAddress(), MARKET_ADDRESS: await market.getAddress(), DEPLOY_BLOCK: String(deployBlock),
     OPERATOR_KEY: operator.privateKey, PUBLIC_URL: `http://127.0.0.1:${PORT}`, AGENTS_FILE: agentsFile, DATA_DIR: join(dir, "data"),
     FEE_PAYEE: payee.address, PORT: String(PORT), WATCH_EVERY_MINUTES: "0.05" };
   const svc = spawn("npx", ["tsx", "src/server.ts"], { cwd: new URL("..", import.meta.url).pathname, env, stdio: ["ignore", "inherit", "inherit"] });
@@ -167,6 +168,30 @@ async function main() {
     }
     check("alert arrives encrypted in the agent's inbox and only the owner's key opens it", msg?.subject === "Lending health warning", msg?.body?.split("\n")[0]);
 
+    // What the app reads: the list, the agent's history and the live feed.
+    const live: any[] = [];
+    const ctl = new AbortController();
+    void fetch(`http://127.0.0.1:${PORT}/live`, { signal: ctl.signal }).then(async (r) => {
+      const rd = r.body!.getReader(); let buf = "";
+      for (;;) { const { value, done } = await rd.read(); if (done) break; buf += new TextDecoder().decode(value);
+        for (const part of buf.split("\n\n").slice(0, -1)) if (part.startsWith("data: ")) live.push(JSON.parse(part.slice(6)));
+        buf = buf.split("\n\n").pop()!; }
+    }).catch(() => {});
+    await wait(1000);
+    let list: any = null;
+    for (let i = 0; i < 20; i++) { list = await (await fetch(`http://127.0.0.1:${PORT}/agents`)).json(); if (list.agents?.[0]?.record.work >= 2) { await wait(8000); list = await (await fetch(`http://127.0.0.1:${PORT}/agents`)).json(); break; } await wait(1500); }
+    const card = list.agents[0];
+    check("agent list shows name, owner and record (one call, one alert: no duplicates)", card?.name === "Position Watch" && card.owner === owner.address && card.record.work === 2 && card.record.payments === 2 && card.switchedOn === true, JSON.stringify(card?.record));
+    const hist = await (await fetch(`http://127.0.0.1:${PORT}/agents/${agentId}/history`)).json();
+    const names = hist.items.map((x: any) => x.name);
+    check("history lists registration, deposit, budget decisions and work, each with its transaction",
+      ["AgentRegistered", "Deposited", "PaymentDecided", "Recorded"].every((n) => names.includes(n)) && hist.items.every((x: any) => /^0x[0-9a-f]{64}$/.test(x.tx)), names.join(", "));
+
+    // A payment above the owner's per-payment limit: the budget circuit refuses it on chain.
+    const big = await (budget.connect(operator) as any).pay(agentId, USDT0, payee.address, parseUnits("0.9", 6), "0x" + "11".repeat(32));
+    await big.wait();
+    check("budget circuit refuses a payment above the owner's limit and it is recorded", (await registry.recordOf(agentId)).blocked === 1n);
+
     // Sale: the agent changes hands. The old owner's permission and delegation stop working.
     await (await new Contract(cpuAddr, CPU_ABI, owner).transferFrom(owner.address, buyer.address, agentTok)).wait();
     check("after the sale the manifest is withdrawn until the new owner switches it on", (await fetch(base + "/.well-known/tapeapi.json")).status === 404);
@@ -174,6 +199,9 @@ async function main() {
     const ts3 = Math.floor(Date.now() / 1000);
     const oldSig = await owner.signMessage(getBytes(ownerDigest(agentId, "own-2", "health", params, ts3)));
     const old = await (await fetch(base + "/health", { method: "POST", headers: { [OWNER_HEADER]: `${ts3}.${oldSig}` }, body: JSON.stringify({ id: "own-2", params }) })).json();
+    for (let i = 0; i < 10 && !live.some((x) => x.name === "PaymentDecided" && x.data.allowed === false); i++) await wait(1500);
+    ctl.abort();
+    check("live feed reports new events as they happen, including a payment the circuit refused", live.length > 0, live.map((x) => x.name + (x.name === "PaymentDecided" ? `(${x.data.allowed})` : "")).join(", "));
     check("old owner can no longer spend the agent's budget", old.ok === false && old.error.code === "BAD_REQUEST", old.error?.message);
   } finally {
     svc.kill();

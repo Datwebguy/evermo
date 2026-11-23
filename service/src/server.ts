@@ -15,6 +15,10 @@ import { seal, endpointID } from "./tapesend.ts";
 import * as pw from "./agents/positionWatch.ts";
 import * as trc from "./agents/tokenRiskCheck.ts";
 import { verifyAgentAt } from "./verify.ts";
+import { Indexer } from "./indexer.ts";
+import { catalog } from "./catalog.ts";
+import { provider } from "./chain.ts";
+import { join } from "node:path";
 
 const cfg = deployment();
 const db = stores(cfg.dataDir);
@@ -28,6 +32,10 @@ type Agent = Deployed & { def: AgentDef; tokenIdN: bigint; container: string; ag
 const defs = { positionWatch: pw.def, tokenRiskCheck: trc.def } as const;
 const deployed: Deployed[] = JSON.parse(readFileSync(cfg.agentsFile, "utf8"));
 const registry = op.registry(cfg.registry), budget = op.budget(cfg.budget);
+
+const ix = new Indexer(join(cfg.dataDir, "index.db"), provider, { registry: cfg.registry, budget: cfg.budget, market: cfg.market }, cfg.deployBlock);
+const cat = catalog(provider, ix, { registry: cfg.registry, market: cfg.market });
+ix.start();
 
 const agents = new Map<string, Agent>();
 for (const d of deployed) {
@@ -177,7 +185,11 @@ async function mcp(a: Agent, req: IncomingMessage) {
 }
 
 // ---------- watches: Position Watch checks owners' accounts and sends alerts ----------
+let watching = false;
 async function watchOnce() {
+  if (watching) return; // one round at a time, so an alert is never sent or charged twice
+  watching = true;
+  try {
   for (const [key, w] of db.watches.all()) {
     const a = agents.get(w.slug);
     if (!a) continue;
@@ -198,6 +210,7 @@ async function watchOnce() {
       db.watches.set(key, { ...w, atRisk: h.atRisk });
     } catch (e) { console.error("watch", key, e); }
   }
+  } finally { watching = false; }
 }
 
 // ---------- routes ----------
@@ -210,6 +223,21 @@ const server = createServer(async (req, res) => {
       if (!/^https:\/\/[^\s]+$/.test(at)) return send(res, 400, { error: "Give the agent's https address" });
       const c = await verifyAgentAt(at, { chainId: chain.id, hub: chain.hub, holderOf, containerOf });
       return send(res, 200, { ok: c.ok, problems: c.problems, name: c.manifest?.name ?? null, circuits: c.manifest?.circuits ?? null, tokenId: c.manifest?.tokenId ?? null });
+    }
+    if (req.method === "GET" && url.pathname === "/agents") return send(res, 200, { agents: await cat.list(), indexedTo: ix.head() });
+    const ah = url.pathname.match(/^\/agents\/(0x[0-9a-fA-F]{64})(\/history)?$/);
+    if (req.method === "GET" && ah) {
+      if (ah[2]) return send(res, 200, { items: ix.history(ah[1]), indexedTo: ix.head() });
+      return send(res, 200, await cat.get(ah[1]));
+    }
+    if (req.method === "GET" && url.pathname === "/activity") return send(res, 200, { items: ix.recent(), indexedTo: ix.head() });
+    if (req.method === "GET" && url.pathname === "/live") {
+      res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache", "access-control-allow-origin": "*", connection: "keep-alive" });
+      const on = (it: unknown) => res.write(`data: ${JSON.stringify(it)}\n\n`);
+      const ping = setInterval(() => res.write(": ping\n\n"), 25000);
+      ix.on("item", on);
+      req.on("close", () => { ix.off("item", on); clearInterval(ping); });
+      return;
     }
     if (url.pathname === "/health") return send(res, 200, { ok: true, agents: [...agents.keys()] });
     const m = url.pathname.match(/^\/a\/([a-z0-9-]+)(\/.*)?$/);

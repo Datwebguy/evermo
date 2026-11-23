@@ -17,6 +17,8 @@ export function deployment() {
   return {
     registry: need("REGISTRY_ADDRESS"),
     budget: need("BUDGET_ADDRESS"),
+    market: need("MARKET_ADDRESS"),
+    deployBlock: Number(need("DEPLOY_BLOCK")),
     operatorKey: need("OPERATOR_KEY"),
     publicUrl: need("PUBLIC_URL").replace(/\/$/, ""),
     agentsFile: need("AGENTS_FILE"),

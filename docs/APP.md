@@ -151,8 +151,9 @@ The chain is the source of truth. Nothing the app shows as fact comes only from 
 | Watches | Service store | Owner-signed requests only |
 | Agent descriptions | DeWEB site or the outside agent's https address | Fetched and checked (TAP-11, TAP-15) |
 
-**Database.** SQLite in the service, through Node's built-in `node:sqlite`. No extra native packages. Tables:
-`events` (block, tx, log index, contract, kind, agent, fields), `receipts`, `delegations`, `watches`, `calls`. The
+**Database.** SQLite in the service, through Node's built-in `node:sqlite`, for the chain index: `events` (block, time,
+transaction, log index, contract, event, agent, fields). Delegations, receipts, watches and used request ids are kept in
+small JSON files written atomically. The
 index can be rebuilt from the chain at any time, so losing it loses nothing. X Layer's RPC returns logs 100 blocks at a
 time; the indexer walks forward in 100-block steps from the deployment block and keeps up with new blocks.
 
@@ -171,12 +172,14 @@ Service (existing):
 | `POST /a/<agent>/receipt` | A stored receipt |
 | `GET /check-agent?url=` | Checks an outside agent before it is listed |
 
-Service (to add for the app):
+Service (for the app, built):
 
 | Route | Purpose |
 |-------|---------|
 | `GET /agents` | Registered agents with their records, for the list and ranking |
+| `GET /agents/<id>` | One agent |
 | `GET /agents/<id>/history` | Work, payments, decisions and sales, each with its transaction |
+| `GET /activity` | The latest events across all agents |
 | `GET /live` | Server-sent events: new decisions, sales and work as blocks arrive |
 
 Chain (read by the browser): `AgentRegistry`, `AgentBudget`, `EvermoMarket`, the processor's `eval` and `netlist`, ERC-20
