@@ -1,5 +1,5 @@
 // Token Risk Check: contract facts read from X Layer and market facts from GeckoTerminal, summarised by the AI model.
-import { Contract, getAddress, isAddress, ZeroAddress } from "ethers";
+import { Contract, formatUnits, getAddress, isAddress, ZeroAddress } from "ethers";
 import { provider } from "../chain.ts";
 import type { AgentDef } from "../manifest.ts";
 import { BadInput } from "./positionWatch.ts";
@@ -8,7 +8,7 @@ export const def: AgentDef = {
   name: "Token Risk Check",
   description: "Checks a token on X Layer: its contract, who controls it, its liquidity and its trading.",
   methods: [{ name: "check", priceBEM: "0", params: { token: "address" }, returns: "report",
-    description: "A report on the token's contract, owner controls, liquidity and trading, with a plain summary" }],
+    description: "Checks a token on X Layer: who controls it, its liquidity and its trading, with a short summary in plain words" }],
   tools: [{ name: "check", title: "Token check",
     description: "Read a token's contract, owner controls, liquidity pools and trading on X Layer.",
     inputSchema: { type: "object", properties: { token: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" } }, required: ["token"], additionalProperties: false } }],
@@ -51,16 +51,17 @@ export async function facts(params: any) {
   return {
     block, token,
     contract: {
-      name, symbol, decimals: decimals === null ? null : Number(decimals), totalSupply: totalSupply?.toString() ?? null,
+      name, symbol, decimals: decimals === null ? null : Number(decimals),
+      totalSupply: totalSupply === null ? null : decimals === null ? totalSupply.toString() : formatUnits(totalSupply, Number(decimals)),
       codeBytes: (code.length - 2) / 2,
       upgradeable: impl !== null, implementation: impl,
       owner: owner === null ? null : owner, ownerRenounced: owner === ZeroAddress,
-      pausable: paused !== null, paused,
+      pausable: paused !== null, ...(paused !== null ? { paused } : {}),
     },
     market: {
       pools: list.length, totalLiquidityUsd: liq.toFixed(2), largestPools: list.slice(0, 5),
       flaggedHoneypot: a?.is_honeypot === true ? true : a?.is_honeypot === false ? false : null,
-      holders: a?.holders?.count ?? null,
+      ...(a?.holders?.count != null ? { holders: a.holders.count } : {}),
     },
     sources: { chain: "X Layer at block " + block, market: "GeckoTerminal" },
   };

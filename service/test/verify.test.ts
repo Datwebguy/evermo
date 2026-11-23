@@ -13,7 +13,7 @@ async function fixture() {
   const expires = now + 86400;
   const m = { tapeapi: "0.1", name: "Outside agent", circuits, tokenId: "7", container, signer: signer.address,
     delegation: { expires, sig: await signDelegation(owner, 196, hub, container, signer.address, expires) },
-    endpoints: { live: ["https://agent.example/api"] }, methods: [{ name: "ask", priceBEM: "0", params: {}, returns: "x", description: "x" }] };
+    endpoints: { live: ["https://agent.example/api"], async: false }, methods: [{ name: "ask", priceBEM: "0", params: {}, returns: "x", description: "x" }] };
   let holder = owner.address;
   const chain = { chainId: 196, hub, holderOf: async () => holder, containerOf: async () => ({ container, opened: true }) };
   return { m, chain, setHolder: (a: string) => { holder = a; } };
@@ -34,5 +34,5 @@ test("wrong container, expired approval and plain http are refused", async () =>
   const f = await fixture();
   assert.equal((await verifyManifest({ ...f.m, container: Wallet.createRandom().address }, f.chain, now)).ok, false);
   assert.equal((await verifyManifest(f.m, f.chain, now + 2 * 86400)).ok, false);
-  assert.equal((await verifyManifest({ ...f.m, endpoints: { live: ["http://x"] } }, f.chain, now)).ok, false);
+  assert.equal((await verifyManifest({ ...f.m, endpoints: { live: ["http://x"], async: false } }, f.chain, now)).ok, false);
 });

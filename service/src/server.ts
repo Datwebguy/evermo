@@ -56,7 +56,7 @@ async function readBody(req: IncomingMessage, limit = 256 * 1024): Promise<Uint8
 }
 function send(res: ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}) {
   res.writeHead(status, { "content-type": "application/json", "access-control-allow-origin": "*",
-    "access-control-expose-headers": "x-tapeapi-receipt", ...headers });
+    "access-control-expose-headers": "x-tapeapi-receipt, x-evermo-payment, x-evermo-record, x-evermo-ref", ...headers });
   res.end(typeof body === "string" ? body : JSON.stringify(body));
 }
 
@@ -111,7 +111,7 @@ async function run(a: Agent, method: string, params: any): Promise<{ result: any
   if (a.kind === "tokenRiskCheck" && method === "check") {
     const facts = await trc.facts(params);
     const req = new TextEncoder().encode(JSON.stringify({ model: ai.model, messages: [
-      { role: "system", content: "You review tokens for everyday traders. Using only the facts given, write 3 to 5 short sentences in plain words: what the token is, who can change it, how much liquidity it has, and what to be careful about. Do not invent facts. If something is unknown, say so." },
+      { role: "system", content: "You review tokens for everyday traders. Using only the facts given, write 3 to 5 short sentences of plain prose (no lists, no dashes, no markdown): what the token is, who can change it, how much liquidity it has, and what to be careful about. Total supply is already in whole tokens. Do not invent facts. If something is unknown, say so." },
       { role: "user", content: JSON.stringify(facts) }], reasoning_effort: "minimal" }));
     const m = await meteredChat(signer, a.container, ai.model, req);
     db.receipts.set(`${a.slug}:${m.receipt.id}`, m.receipt);

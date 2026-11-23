@@ -11,7 +11,7 @@ export const def: AgentDef = {
   name: "Position Watch",
   description: "Watches a lending position on Aave on X Layer and warns before it can be liquidated.",
   methods: [{ name: "health", priceBEM: "0", params: { account: "address", warnBelow: "string?" }, returns: "health",
-    description: "Current collateral, debt and health factor of an account, and whether it is below the warning level" }],
+    description: "Checks a lending position on Aave on X Layer: collateral, debt and health, and warns before it can be liquidated" }],
   tools: [{ name: "health", title: "Lending health",
     description: "Read the collateral, debt and health factor of an Aave account on X Layer.",
     inputSchema: { type: "object", properties: { account: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$" }, warnBelow: { type: "string", pattern: "^[0-9]+(\\.[0-9]{1,4})?$" } }, required: ["account"], additionalProperties: false } }],

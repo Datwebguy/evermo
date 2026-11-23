@@ -31,6 +31,7 @@ export async function verifyManifest(m: any, chain: Chain, now = Math.floor(Date
   if (!isAddress(m.circuits) || !isAddress(m.container) || !isAddress(m.signer)) bad("Addresses in the description are not valid");
   if (typeof m.tokenId !== "string" || !/^(0|[1-9][0-9]*)$/.test(m.tokenId)) bad("The agent's number is not valid");
   const live = m.endpoints?.live;
+  if (typeof m.endpoints?.async !== "boolean") bad("The description does not say how the agent takes requests");
   if (!Array.isArray(live) || live.length === 0 || !live.every((u: unknown) => typeof u === "string" && u.startsWith("https://"))) bad("The agent has no secure address");
   if (!Array.isArray(m.methods) || m.methods.length === 0) bad("The agent lists nothing it can do");
   else for (const x of m.methods) {

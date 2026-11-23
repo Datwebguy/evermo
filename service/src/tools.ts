@@ -1,5 +1,5 @@
 // TAP-15 tool pinning: toolsSha256 over the normalised tool list.
-import { createHash } from "node:crypto";
+import { sha256, toUtf8Bytes } from "ethers";
 import { canonicalJSON } from "./canonical.ts";
 
 const COVERED = ["name", "title", "description", "inputSchema", "outputSchema", "annotations"] as const;
@@ -16,5 +16,5 @@ export function normalise(tools: Tool[]): object[] {
   }).sort((a: any, b: any) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 }
 export function toolsSha256(tools: Tool[]): string {
-  return createHash("sha256").update(canonicalJSON(normalise(tools))).digest("hex");
+  return sha256(toUtf8Bytes(canonicalJSON(normalise(tools)))).slice(2);
 }

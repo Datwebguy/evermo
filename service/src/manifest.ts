@@ -30,7 +30,7 @@ export function buildManifest(o: {
     container: o.container,
     signer: o.signer,
     delegation: o.delegation,
-    endpoints: { live: [o.liveUrl] },
+    endpoints: { live: [o.liveUrl], async: false },
     methods: [...o.agent.methods,
       { name: "receipt", priceBEM: "0", params: { id: "string" }, returns: "receipt", description: "Signed usage receipt for an earlier request" }],
     mcp: { endpoint: o.liveUrl + "/mcp", toolsSha256: toolsSha256(o.agent.tools) },
