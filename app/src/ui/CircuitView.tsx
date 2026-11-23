@@ -82,7 +82,7 @@ export function CircuitView({ id, bits, labels, outLabels, caption }: { id: stri
           </g>;
         })}
       </svg>
-      <figcaption className="hint" style={{ marginTop: 8 }}>{caption ?? `The check is ${net.gates.length} logic gates, taped out on X Layer. Nobody can change them.`}</figcaption>
+      <figcaption className="hint" style={{ marginTop: 8 }}>{caption ?? `${net.gates.length} logic gates on X Layer. Nobody can change them.`}</figcaption>
     </figure>
   );
 }

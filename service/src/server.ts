@@ -113,7 +113,7 @@ async function run(a: Agent, method: string, params: any): Promise<{ result: any
     if (params.lang !== undefined && params.lang !== "en" && params.lang !== "zh") throw new pw.BadInput("lang must be en or zh");
     const language = params.lang === "zh" ? " Write in Simplified Chinese." : "";
     const req = new TextEncoder().encode(JSON.stringify({ model: ai.model, messages: [
-      { role: "system", content: "You review tokens for everyday traders. Using only the facts given, write 3 to 5 short sentences of plain prose (no lists, no dashes, no markdown): what the token is, who can change it, how much liquidity it has, and what to be careful about. Total supply is already in whole tokens. Do not invent facts. If something is unknown, say so." + language },
+      { role: "system", content: "You review tokens for everyday traders. Using only the facts given, write at most 2 short sentences, 35 words in total, in plain prose: the main risk first, then the main reassurance, without labels or headings. Never include addresses, long numbers or markdown. Total supply is already in whole tokens. Do not invent facts." + language },
       { role: "user", content: JSON.stringify(facts) }], reasoning_effort: "minimal" }));
     const m = await meteredChat(signer, a.container, ai.model, req);
     db.receipts.set(`${a.slug}:${m.receipt.id}`, m.receipt);

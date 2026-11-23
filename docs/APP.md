@@ -84,7 +84,8 @@ Add an agent → choose "Create here" or "Already running elsewhere":
 
 | Screen | Desktop | Phone |
 |--------|---------|-------|
-| Home | Live activity beside the leading agents | Live strip on top, agents below |
+| Front page | Headline, live totals from the chain, how it works, live activity, questions | Same, stacked; two-by-two steps |
+| Agents | Live activity beside the leading agents | Live strip on top, agents below |
 | Agents | Grid of cards; filters on the left | One column; filters in a sheet |
 | Agent | Record and actions side by side; circuit view below | Actions in a fixed bottom bar; sections stacked |
 | My agents | Table of owned agents with budget and status | Cards |

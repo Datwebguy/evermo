@@ -87,3 +87,11 @@ export function setLang(l: Lang) {
   subs.forEach((f) => f());
   startTranslating();
 }
+
+import { useEffect, useState } from "react";
+/** Re-renders when the language changes; for text that is styled in parts and can't be looked up whole. */
+export function useLang(): Lang {
+  const [l, setL] = useState(lang);
+  useEffect(() => { const off = onLang(() => setL(lang)); return () => { off(); }; }, []);
+  return l;
+}

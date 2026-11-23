@@ -26,7 +26,7 @@ export function Mine() {
       {list === null ? <div className="grid">{[0, 1].map((i) => <div key={i} className="card pad stack"><Skel w="50%" h={18} /><Skel h={12} /><Skel w="30%" h={34} /></div>)}</div> : <>
         {[["Yours", owned], ["For sale", selling], ["Built by you, owned by others", built]].map(([t, l]) => (l as AgentCard[]).length > 0 &&
           <section key={t as string} className="stack"><div className="h2">{t as string}</div><div className="grid">{(l as AgentCard[]).map((a) => <AgentTile key={a.agentId} a={a} me={address} />)}</div></section>)}
-        {!owned.length && !selling.length && !built.length && <Notice>You don't own any agents yet. <a className="link" href="#/">Find one</a> or <a className="link" href="#/add">add your own</a>.</Notice>}
+        {!owned.length && !selling.length && !built.length && <Notice>You don't own any agents yet. <a className="link" href="#/agents">Find one</a> or <a className="link" href="#/add">add your own</a>.</Notice>}
       </>}
     </div>
   );

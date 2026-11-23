@@ -66,7 +66,11 @@ try {
   // Visitor, desktop and phone
   for (const [w, h, m, tag] of [[1280, 860, false, "desktop"], [390, 844, true, "phone"]]) {
     const p = await person(browser, A, w, h, m);
-    await p.goto(APP); await p.waitForSelector("text=Position Watch"); await settle(p);
+    await p.goto(APP); await p.waitForSelector("text=Explore agents");
+    await p.waitForFunction(() => !document.querySelector(".stat .big")?.textContent?.includes("—"), null, { timeout: 30000 });
+    for (let y = 0; y < 4000; y += 400) { await p.mouse.wheel(0, 400); await p.waitForTimeout(120); }
+    await p.waitForTimeout(800); await shot(p, `landing-${tag}`);
+    await p.goto(APP + "#/agents"); await p.waitForSelector("text=Position Watch"); await settle(p);
     await shot(p, `home-${tag}`);
     await p.click("text=Token Risk Check"); await p.waitForSelector("text=Track record"); await settle(p);
     await shot(p, `agent-${tag}`);
@@ -77,7 +81,7 @@ try {
   // Tour, on a phone and on a desktop: five steps, each lights up its feature on the right page
   for (const [w, h, m, tag] of [[1280, 860, false, "desktop"], [390, 844, true, "phone"]]) {
     const t = await person(browser, A, w, h, m, { tour: true });
-    await t.goto(APP); await t.waitForSelector(".tour-card", { timeout: 15000 });
+    await t.goto(APP + "#/agents"); await t.waitForSelector(".tour-card", { timeout: 15000 });
     const seen = [];
     for (let n = 1; n <= 5; n++) {
       await t.waitForFunction((k) => document.querySelector(".tour-card .num")?.textContent?.startsWith(String(k)), n);
@@ -97,8 +101,9 @@ try {
   const left = new Set();
   for (const [w, h, m, tag] of [[1280, 860, false, "desktop"], [390, 844, true, "phone"]]) {
     const p = await person(browser, A, w, h, m, { lang: "zh", theme: "dark" });
-    for (const [route, name] of [["#/", "home"], ["#/activity", "activity"], ["#/add", "add"], ["#/mine", "mine"]]) {
+    for (const [route, name] of [["#/", "landing"], ["#/agents", "home"], ["#/activity", "activity"], ["#/add", "add"], ["#/mine", "mine"]]) {
       await p.goto(APP + route); await settle(p); await p.waitForTimeout(800);
+      for (let y = 0; y < 4000; y += 500) { await p.mouse.wheel(0, 500); await p.waitForTimeout(100); }
       if (name === "home") { await p.click("text=Token Risk Check"); await settle(p); await shot(p, `zh-dark-agent-${tag}`); await p.goto(APP + route); await settle(p); }
       await shot(p, `zh-dark-${name}-${tag}`);
       (await p.evaluate(() => {
@@ -116,7 +121,7 @@ try {
   }
   {
     const z = await person(browser, A, 390, 844, true, { lang: "zh", theme: "dark" });
-    await z.goto(APP); await z.click("text=Token Risk Check"); await z.waitForSelector("input[placeholder='0x…']");
+    await z.goto(APP + "#/agents"); await z.click("text=Token Risk Check"); await z.waitForSelector("input[placeholder='0x…']");
     await z.fill("input[placeholder='0x…']", "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"); await z.click("button:has-text('运行')");
     await z.waitForSelector("text=由该 Agent 签名", { timeout: 120000 }); await settle(z); await shot(z, "zh-dark-answer-phone");
     const summary = await z.evaluate(() => document.querySelector("p[data-notr]")?.textContent ?? "");
@@ -128,7 +133,7 @@ try {
 
   // Visitor tries Token Risk Check for free
   const v = await person(browser, A, 1280, 860, false);
-  await v.goto(APP); await v.click("text=Token Risk Check"); await v.waitForSelector("text=Try it");
+  await v.goto(APP + "#/agents"); await v.click("text=Token Risk Check"); await v.waitForSelector("text=Try it");
   await v.fill("input[placeholder='0x…']", "0x779Ded0c9e1022225f8E0630b35a9b54bE713736");
   await v.click("text=Run it"); await v.waitForSelector("text=Signed by this agent", { timeout: 120000 }); await settle(v);
   ok("visitor gets a signed answer from Token Risk Check", true); await shot(v, "try-token-check");
@@ -136,7 +141,7 @@ try {
 
   // Owner A lists Position Watch for 20 USDT0
   const a = await person(browser, A, 1280, 860, false);
-  await a.goto(APP); await a.click("text=Connect"); await a.click("text=Browser wallet");
+  await a.goto(APP + "#/agents"); await a.click("text=Connect"); await a.click("text=Browser wallet");
   await a.click("text=Position Watch"); await a.waitForSelector("text=Your agent");
   await a.click("button:has-text('Sell')"); await a.fill("input[placeholder='0.00']", "20"); await settle(a); await shot(a, "sell-sheet");
   await a.click("text=List for sale"); await a.waitForSelector("text=Listed.", { timeout: 60000 }); ok("owner lists the agent", true); await settle(a); await shot(a, "listed-desktop");
@@ -144,7 +149,7 @@ try {
 
   // Buyer B on a phone: buys, sees the split, switches on, runs a paid check
   const b = await person(browser, B, 390, 844, true);
-  await b.goto(APP); await b.click("text=Position Watch"); await b.waitForSelector("button:has-text('Buy')"); await settle(b); await shot(b, "listed-phone");
+  await b.goto(APP + "#/agents"); await b.click("text=Position Watch"); await b.waitForSelector("button:has-text('Buy')"); await settle(b); await shot(b, "listed-phone");
   await b.click("button:has-text('Buy')"); await b.waitForSelector("text=Where the money goes"); await settle(b); await shot(b, "buy-sheet-phone");
   await b.click("button:has-text('Buy for')"); await b.click("text=Browser wallet"); await b.waitForSelector("text=It's yours", { timeout: 60000 }); await b.waitForTimeout(2500);
   ok("buyer buys; split shown from the real transaction", true); await shot(b, "bought-phone");
@@ -163,7 +168,7 @@ try {
     ok("owner runs a paid check: signed, paid, recorded", await b.locator("text=/^Paid 0\\.01/").count() > 0); await shot(b, "paid-run-phone");
   }
   // Owner stops the agent: the budget circuit then refuses a paid run
-  await b.goto(APP + "#/"); await b.click("text=Position Watch"); await b.waitForSelector("text=Stop the agent");
+  await b.goto(APP + "#/agents"); await b.click("text=Position Watch"); await b.waitForSelector("text=Stop the agent");
   await b.click("text=Stop the agent"); await b.click("button:has-text('Stop now')");
   await b.waitForSelector("text=Stopped. No payment", { timeout: 60000 }); await shot(b, "stopped-phone");
   await b.getByRole("button", { name: "Done", exact: true }).click(); await b.waitForSelector(".pill.no:has-text('Stopped')");

@@ -4,16 +4,16 @@ import { agents } from "../service/api";
 
 type Step = { route: (first: string | null) => string; target: string; title: string; text: string };
 const STEPS: Step[] = [
-  { route: () => "/", target: "agents", title: "Find an agent by its record",
-    text: "Every agent shows how many jobs it has done, paid for and sold, read from X Layer. No wallet needed to look." },
-  { route: () => "/", target: "live", title: "Watch it happen live",
-    text: "Every job, payment and sale appears here the moment it lands on chain." },
-  { route: (a) => (a ? `/agent/${a}` : "/"), target: "record", title: "Its record is its value",
-    text: "Open an agent to see its full track record. The record moves with the agent when it is sold." },
+  { route: () => "/agents", target: "agents", title: "Find an agent by its record",
+    text: "Ranked by real work on X Layer. No wallet needed." },
+  { route: () => "/agents", target: "live", title: "Watch it happen live",
+    text: "Every job, payment and sale, as it lands on chain." },
+  { route: (a) => (a ? `/agent/${a}` : "/agents"), target: "record", title: "Its record is its value",
+    text: "Its full record. It goes with the agent when sold." },
   { route: (a) => (a ? `/agent/${a}` : "/activity"), target: "circuit", title: "Rules nobody can change",
-    text: "Every payment from an agent's budget is checked by this circuit on X Layer first. Yes and no light up as each real payment is decided." },
-  { route: (a) => (a ? `/agent/${a}` : "/"), target: "actions", title: "Try it, buy it, resell it",
-    text: "Try any agent free. Buy one to make it yours, give it a budget, and resell it when you are done." },
+    text: "Every payment is checked by this circuit first. It lights up with each real decision." },
+  { route: (a) => (a ? `/agent/${a}` : "/agents"), target: "actions", title: "Try it, buy it, resell it",
+    text: "Try it free. Buy it, give it a budget, resell it later." },
 ];
 const SEEN = "evermo-toured";
 export const tourSeen = () => { try { return localStorage.getItem(SEEN) === "1"; } catch { return true; } };

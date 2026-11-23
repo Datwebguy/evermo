@@ -4,6 +4,7 @@ import { loadDeployment } from "./chain/deployment";
 import { short } from "./chain/format";
 import { WalletProvider, useWallet } from "./state";
 import { Home } from "./screens/Home";
+import { Landing } from "./screens/Landing";
 import { Agent } from "./screens/Agent";
 import { Mine } from "./screens/Mine";
 import { Activity } from "./screens/Activity";
@@ -19,7 +20,7 @@ function useRoute() {
   useEffect(() => { const f = () => { setH(location.hash.slice(1) || "/"); window.scrollTo(0, 0); }; addEventListener("hashchange", f); return () => removeEventListener("hashchange", f); }, []);
   return h;
 }
-const PLACES = [["/", "Agents", House], ["/activity", "Activity", Pulse], ["/mine", "My agents", User], ["/add", "Add", PlusCircle]] as const;
+const PLACES = [["/agents", "Agents", House], ["/activity", "Activity", Pulse], ["/mine", "My agents", User], ["/add", "Add", PlusCircle]] as const;
 
 function WalletButton() {
   const { address, ask, disconnect } = useWallet();
@@ -46,7 +47,7 @@ function Shell() {
   const [touring, setTouring] = useState(false);
   useEffect(() => { const f = () => setTouring(true); addEventListener("evermo-tour", f); return () => removeEventListener("evermo-tour", f); }, []);
   useEffect(() => { if (!tourSeen()) { const t = setTimeout(() => setTouring(true), 1200); return () => clearTimeout(t); } }, []);
-  const at = (p: string) => (p === "/" ? r === "/" || r.startsWith("/agent/") : r.startsWith(p));
+  const at = (p: string) => (p === "/agents" ? r === "/agents" || r.startsWith("/agent/") : r.startsWith(p));
   const agentId = r.match(/^\/agent\/(0x[0-9a-fA-F]{64})$/)?.[1];
   return <>
     <header className="top"><div className="top-in">
@@ -56,7 +57,7 @@ function Shell() {
     </div></header>
     <main>
       {agentId ? <Agent key={agentId} id={agentId} /> : r === "/activity" ? <Activity /> : r === "/mine" ? <Mine /> : r === "/add" ? <Add />
-        : r === "/" ? <Home /> : <Notice>This page does not exist. <a className="link" href="#/">Go to all agents</a>.</Notice>}
+        : r === "/agents" ? <Home /> : r === "/" ? <Landing /> : <Notice>This page does not exist. <a className="link" href="#/agents">Go to all agents</a>.</Notice>}
     </main>
     {touring && <Tour onClose={() => setTouring(false)} />}
     <nav className="tabs">{PLACES.map(([p, t, I]) => <a key={p} href={`#${p}`} aria-current={at(p) ? "page" : undefined}><I size={22} weight={at(p) ? "fill" : "regular"} />{t}</a>)}</nav>

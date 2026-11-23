@@ -75,7 +75,7 @@ export function Agent({ id }: { id: string }) {
 
   return (
     <div className="stack" style={{ gap: 24 }}>
-      <a href="#/" className="link small row" style={{ gap: 6 }}><ArrowLeft size={14} />All agents</a>
+      <a href="#/agents" className="link small row" style={{ gap: 6 }}><ArrowLeft size={14} />All agents</a>
       <div className="split">
         <div className="stack" style={{ gap: 24, minWidth: 0 }}>
           <header className="stack" style={{ gap: 8 }}>
@@ -94,7 +94,7 @@ export function Agent({ id }: { id: string }) {
               {[["payments made", a.record.payments], ["refused by its rules", a.record.blocked], ["times sold", a.record.sales]].map(([t, n]) =>
                 <div key={t as string}><div className="num" style={{ fontSize: 22, fontWeight: 650 }}><Roll>{String(n)}</Roll></div><div className="label">{t}</div></div>)}
             </div>
-            <div className="hint" style={{ marginTop: 12 }}>Recorded on X Layer since {dateOf(a.registeredAt)}. It moves with the agent when it is sold.</div>
+            <div className="hint" style={{ marginTop: 12 }}>On X Layer since {dateOf(a.registeredAt)}. It moves with the agent.</div>
           </section>
 
           {method && (
@@ -121,14 +121,14 @@ export function Agent({ id }: { id: string }) {
           )}
 
           <section className="card pad stack" data-tour="circuit">
-            <div className="between"><div className="h2">How its budget is decided</div>{lastPay && <span className={`pill ${lastPay.data.allowed ? "ok" : "no"}`}>Last: {lastPay.data.allowed ? "allowed" : "refused"}</span>}</div>
-            <p className="muted small" style={{ margin: 0 }}>Every payment from this agent's budget goes through this check on X Layer first. {lastPay ? `Shown with the last payment, ${money(lastPay.data.amount, lastPay.data.token)}.` : "No payment yet."}</p>
+            <div className="between"><div className="h2">Budget rules</div>{lastPay && <span className={`pill ${lastPay.data.allowed ? "ok" : "no"}`}>Last: {lastPay.data.allowed ? "allowed" : "refused"}</span>}</div>
+            <p className="muted small" style={{ margin: 0 }}>{lastPay ? `Every payment passes this check first. Last one: ${money(lastPay.data.amount, lastPay.data.token)}.` : "Every payment passes this check first."}</p>
             <CircuitView id={dep().budgetCircuitId} bits={lastPay ? parseInt(String(lastPay.data.inputs), 16) : null} labels={circuits.budget.inputs} outLabels={circuits.budget.outputs} />
           </section>
 
           {lastSale && (
             <section className="card pad stack">
-              <div className="h2">How its last sale was decided</div>
+              <div className="h2">Last sale check</div>
               <CircuitView id={dep().resaleCircuitId} bits={parseInt(String(lastSale.data.inputs), 16)} labels={circuits.resale.inputs} outLabels={circuits.resale.outputs} />
             </section>
           )}

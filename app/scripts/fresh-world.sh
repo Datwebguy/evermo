@@ -8,3 +8,6 @@ for i in $(seq 1 30); do curl -s -o /dev/null -X POST -H 'content-type: applicat
 (cd "$ROOT/service" && nohup npx tsx scripts/dev-fork.ts > "$LOG/dev.log" 2>&1 &)
 for i in $(seq 1 120); do grep -q "Ready" "$LOG/dev.log" 2>/dev/null && break; grep -q "Error" "$LOG/dev.log" 2>/dev/null && { tail -20 "$LOG/dev.log"; exit 1; }; sleep 3; done
 tail -1 "$LOG/dev.log"
+# The app's dev server
+pgrep -f "vite --port 5173" >/dev/null || (cd "$ROOT/app" && nohup npx vite --port 5173 --host 127.0.0.1 > "$LOG/vite.log" 2>&1 &)
+for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:5173/ && break; sleep 1; done

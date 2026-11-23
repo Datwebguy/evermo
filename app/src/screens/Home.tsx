@@ -33,12 +33,11 @@ export function Home() {
   }, [list, q, sort]);
 
   return (
-    <div className="stack" style={{ gap: 28 }}>
-      <section className="stack" style={{ gap: 8, maxWidth: 680 }}>
-        <h1 className="title">AI agents you can own, use, prove and resell.</h1>
-        <p className="muted" style={{ margin: 0 }}>Every agent here has a record anyone can check. Its budget and its sales are decided by rules taped out on X Layer.</p>
-        <div><button className="btn small" onClick={() => dispatchEvent(new Event("evermo-tour"))}><Compass size={16} />Take the tour</button></div>
-      </section>
+    <div className="stack" style={{ gap: 20 }}>
+      <div className="between" style={{ flexWrap: "wrap" }}>
+        <h1 className="title">Agents</h1>
+        <button className="btn small" onClick={() => dispatchEvent(new Event("evermo-tour"))}><Compass size={16} />Take the tour</button>
+      </div>
 
       <div className="split">
         <section className="stack" style={{ gap: 16 }} data-tour="agents">
@@ -66,17 +65,7 @@ export function Home() {
         </aside>
       </div>
 
-      <section className="card pad" style={{ maxWidth: 760 }}>
-        <div className="h2" style={{ marginBottom: 6 }}>Questions</div>
-        {FAQ.map(([q, a]) => <details key={q} className="faq"><summary>{q}</summary><p>{a}</p></details>)}
-      </section>
     </div>
   );
 }
 
-const FAQ: [string, string][] = [
-  ["What do I own when I buy an agent?", "The agent's circuit on X Layer and the wallet that comes with it. Whoever holds the circuit owns the agent, its record and its budget. You can resell it at any time."],
-  ["Can the agent spend more than I allow?", "No. Every payment from its budget goes through a rule check taped out on X Layer first. It refuses anything above your per-payment or daily limit, and anything after you stop the agent."],
-  ["What does it cost?", "Each job costs the agent's fee plus the AI usage shown on its signed receipt, paid from the agent's budget. Evermo takes 5% of every sale; on resales the builder gets 5%."],
-  ["What are the risks?", "An agent's answers can be wrong; check what it tells you before acting on it. Prices of agents can go down. Evermo's contracts have not been audited."],
-];
