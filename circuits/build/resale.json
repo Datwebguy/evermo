@@ -1,0 +1,17 @@
+{
+  "name": "resale",
+  "inputs": [
+    "listing_active",
+    "escrow_holds_agent",
+    "price_paid",
+    "first_sale"
+  ],
+  "outputs": [
+    "allow",
+    "royalty_on"
+  ],
+  "nIn": 4,
+  "nOut": 2,
+  "gates": 11,
+  "netlist": "0x00000002000003000000060000060000000700000400000008000008000000050000050000000900000a0000000b00000b000000090000090000000c00000c0000000d00000d0000000e00000e"
+}

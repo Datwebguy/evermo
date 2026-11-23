@@ -1,0 +1,7 @@
+{
+  "name": "evermo",
+  "private": true,
+  "type": "module",
+  "workspaces": ["circuits", "contracts", "service", "app"],
+  "license": "MIT"
+}
