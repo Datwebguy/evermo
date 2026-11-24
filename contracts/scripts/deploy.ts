@@ -6,7 +6,7 @@
 // and picks up where it left off without paying twice. Before spending anything it prints the plan and the cost read
 // from the TapeOut contracts, and checks the wallet balance. On mainnet nothing is sent without CONFIRM=yes.
 //
-//   DEPLOYER_KEY=… OPERATOR_ADDRESS=0x… FEE_RECIPIENT=0x… SERVICE_URL=https://… AGENTS=positionWatch,tokenRiskCheck ALERTS=yes \
+//   DEPLOYER_KEY=… OPERATOR_ADDRESS=0x… FEE_RECIPIENT=0x… OWNER_ADDRESS=0x… (gets the agents and the OKB left over) SERVICE_URL=https://… AGENTS=positionWatch,tokenRiskCheck ALERTS=yes \
 //   NAME=xlayer [XLAYER_RPC_URL=…] [CONFIRM=yes] npx tsx scripts/deploy.ts
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { Contract, ContractFactory, JsonRpcProvider, Wallet, formatEther, getAddress, isAddress } from "ethers";
@@ -90,7 +90,8 @@ const ids = [...agentKinds.map((k) => `agent.${k}`), ...(alerts ? ["sender"] : [
 const cost = (state.budgetCircuitId ? 0n : tape + mintBudget) + (state.resaleCircuitId ? 0n : tape + mintResale)
   + ids.reduce((sum, k) => sum + (state[`${k}.tokenId`] ? 0n : tape + mintOne) + (state[`${k}.opened`] ? 0n : fee), 0n);
 void identities;
-const gasReserve = 10n ** 15n; // 0.001 OKB for gas at today's 0.02 gwei is many times what the run uses
+const operatorGas = BigInt(Math.round(Number(env("OPERATOR_GAS", "0.006")) * 1e18)); // for recording work, alerts and the site upload
+const gasReserve = 10n ** 15n + (state.operatorFunded ? 0n : operatorGas); // 0.001 OKB for gas at today's 0.02 gwei is many times what the run uses
 console.log(`\nEvermo deployment "${name}" on chain ${net.chainId} via ${rpcUrl}`);
 console.log(`  deployer        ${me.address}  balance ${formatEther(bal)} OKB`);
 console.log(`  operator        ${operator}`);
@@ -98,7 +99,7 @@ console.log(`  fee recipient   ${feeRecipient}`);
 console.log(`  service         ${serviceUrl}`);
 console.log(`  agents          ${agentKinds.join(", ")}${alerts ? " + sender identity for alerts" : ""}`);
 console.log(`  TapeOut prices  container ${formatEther(fee)}, tape-out ${formatEther(tape)}, one-gate mint ${formatEther(mintOne)}, budget mint ${formatEther(mintBudget)}, resale mint ${formatEther(mintResale)} OKB`);
-console.log(`  cost            ${formatEther(cost)} OKB to TapeOut for the steps still to do + gas reserve ${formatEther(gasReserve)} OKB`);
+console.log(`  cost            ${formatEther(cost)} OKB to TapeOut for the steps still to do, + ${formatEther(gasReserve)} OKB for gas (incl. the operator's)`);
 if (bal < cost + gasReserve && !state.done) throw new Error(`Not enough OKB: need about ${formatEther(cost + gasReserve)}, have ${formatEther(bal)}`);
 if (rpcUrl.includes("rpc.xlayer.tech") && process.env.CONFIRM !== "yes") { console.log("\nMainnet: nothing sent. Run again with CONFIRM=yes to deploy.\n"); process.exit(0); }
 
@@ -142,6 +143,27 @@ if (alerts) {
     if ((await cpu.ownerOf(tokenId)).toLowerCase() !== operator.toLowerCase()) await (await cpu.transferFrom(me.address, operator, tokenId)).wait();
     return true;
   });
+}
+await step("operatorFunded", `give the operator ${formatEther(operatorGas)} OKB for gas`, async () => {
+  if (operatorGas > 0n) await (await me.sendTransaction({ to: operator, value: operatorGas })).wait();
+  return true;
+});
+// The agents go to their real owner's wallet, so no private key of the owner is ever needed here.
+const finalOwner = process.env.OWNER_ADDRESS ? getAddress(process.env.OWNER_ADDRESS) : null;
+if (finalOwner) for (const kind of agentKinds) {
+  const tokenId = state[`agent.${kind}.tokenId`];
+  const holder = (await cpu.ownerOf(tokenId)).toLowerCase();
+  if (holder !== me.address.toLowerCase() && holder !== finalOwner.toLowerCase()) { console.log(`  skip   ${SLUGS[kind]} is held by ${holder} (listed or moved), not handed over`); continue; }
+  await step(`agent.${kind}.toOwner`, `hand ${SLUGS[kind]} to ${finalOwner}`, async () => {
+    if (holder !== finalOwner.toLowerCase()) await (await cpu.transferFrom(me.address, finalOwner, tokenId)).wait();
+    return true;
+  });
+}
+// Whatever OKB is left goes back to the owner (or a REFUND_ADDRESS), keeping only enough for this transaction.
+const refundTo = process.env.REFUND_ADDRESS ? getAddress(process.env.REFUND_ADDRESS) : finalOwner;
+if (refundTo) {
+  const left = await p.getBalance(me.address), gp = (await p.getFeeData()).gasPrice ?? 0n, keep = gp * 21000n * 2n;
+  if (left > keep) { await (await me.sendTransaction({ to: refundTo, value: left - keep, gasLimit: 21000n, gasPrice: gp })).wait(); console.log(`  ok     returned ${formatEther(left - keep)} OKB to ${refundTo}`); }
 }
 state.done = true; save();
 

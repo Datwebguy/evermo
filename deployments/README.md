@@ -26,4 +26,5 @@ Written by `contracts/scripts/deploy.ts` (and read by `service/scripts/launch.ts
 | Evermo's identity, which owns the site and sends alerts | 0.0820 |
 | Contracts and setup, 20 transactions, about 6 million gas at 0.02 gwei | 0.0001 |
 | Site: 617 KB in 32 transactions, about 143 million gas at 0.02 gwei; name fee 0 today | 0.0029 |
-| **Two agents, total** | **≈ 0.253** |
+| Gas for the operator (recording work, alerts, site upload) | 0.006 |
+| **Two agents, total** | **≈ 0.259**, anything unused goes back to the owner |

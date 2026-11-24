@@ -17,5 +17,6 @@
   "sender.tokenId": "1027",
   "sender.opened": "0xaCb7c5F1bcFA281993951D91B7f7d805830D8Bae",
   "sender.toOperator": true,
-  "done": true
+  "done": true,
+  "agent.tokenRiskCheck.toOwner": true
 }
