@@ -24,3 +24,11 @@ npm test                 # unit tests and the official TAP test vectors
 npm run live             # both agents and one AI call against live X Layer and the AI provider (read-only on chain)
 npx tsx scripts/e2e-fork.ts   # full run on a local copy of X Layer (start `npx hardhat node --network xfork` in contracts/ first)
 ```
+
+## Hosting
+
+`railway.json` at the repository root builds only this workspace and starts `src/server.ts`; Railway checks `/health`.
+Give the service a persistent volume and point `DATA_DIR` at it: it holds the owners' signed approvals, receipts, watches
+and the chain index (the index can be rebuilt from the chain; the approvals cannot). Set `OPERATOR_KEY` as a secret.
+`FEE_PAYEE` must be the same address as the market's fee recipient in the deployment, so the app's "allow payments for
+running costs" step allows the address the service is paid at.
