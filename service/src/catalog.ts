@@ -6,7 +6,7 @@ const descCache = new Map<string, { at: number; v: any }>();
 async function describe(manifestUrl: string): Promise<{ name: string | null; description: string | null; live: boolean }> {
   if (!/^https?:\/\//.test(manifestUrl)) return { name: null, description: null, live: false };
   const c = descCache.get(manifestUrl);
-  if (c && Date.now() - c.at < 600_000) return c.v;
+  if (c && Date.now() - c.at < (c.v.live ? 600_000 : 30_000)) return c.v; // a missing description is retried soon
   let v = { name: null as string | null, description: null as string | null, live: false };
   try {
     const r = await fetch(manifestUrl.replace(/\/$/, "") + "/.well-known/tapeapi.json", { signal: AbortSignal.timeout(8000), redirect: "error" });

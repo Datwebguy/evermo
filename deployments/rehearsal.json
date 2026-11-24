@@ -1,0 +1,21 @@
+{
+  "processor": "0x60918C204F3c94630D3D793738Fc36293c8405D6",
+  "deployBlock": 76717422,
+  "budgetCircuitId": "1023",
+  "resaleCircuitId": "1024",
+  "registry": "0xe4EB561155AFCe723bB1fF8606Fbfe9b28d5d38D",
+  "budget": "0xcf27F781841484d5CF7e155b44954D7224caF1dD",
+  "market": "0x673cD70FA883394a1f3DEb3221937Ceb7C2618D7",
+  "bound": true,
+  "agents": {},
+  "agent.positionWatch.tokenId": "1025",
+  "agent.positionWatch.opened": "0xCEBb0a3a51eC96f3D2e4F8A5139873E3F1d3BAd7",
+  "agent.positionWatch.agentId": "0xde57e51b1296fc1e8a0921123774b9360ae4322828075a5174cf2d072d0f511d",
+  "agent.tokenRiskCheck.tokenId": "1026",
+  "agent.tokenRiskCheck.opened": "0x3C4DDf0310231d532e7234bCC990404A0c2ECB98",
+  "agent.tokenRiskCheck.agentId": "0x598009a620acb319a919455e5109dadf15fb9ab3bbee25038fb1ae0865c8f8bb",
+  "sender.tokenId": "1027",
+  "sender.opened": "0xaCb7c5F1bcFA281993951D91B7f7d805830D8Bae",
+  "sender.toOperator": true,
+  "done": true
+}

@@ -1,0 +1,32 @@
+{
+  "network": "X Layer",
+  "chainId": 196,
+  "rpc": "https://rpc.xlayer.tech",
+  "explorer": "https://www.oklink.com/xlayer",
+  "service": "http://127.0.0.1:8791",
+  "registry": "0xe4EB561155AFCe723bB1fF8606Fbfe9b28d5d38D",
+  "budget": "0xcf27F781841484d5CF7e155b44954D7224caF1dD",
+  "market": "0x673cD70FA883394a1f3DEb3221937Ceb7C2618D7",
+  "deployBlock": 76717422,
+  "processor": "0x60918C204F3c94630D3D793738Fc36293c8405D6",
+  "budgetCircuitId": "1023",
+  "resaleCircuitId": "1024",
+  "operator": "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+  "feeRecipient": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+  "hub": "0xe61A9C7213a6Aa616C246a2B569e555B417b25ee",
+  "opener": "0x536adD8F30f03b69f6fbF29d425A816A0dC50106",
+  "factory": "0x1f09DAeFA827f02CBb40967cc91b259763760761",
+  "tokens": [
+    {
+      "symbol": "USDT0",
+      "address": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+      "decimals": 6
+    },
+    {
+      "symbol": "BEM",
+      "address": "0x60e62Efa9405d6873C5deaBD4E6CC91c25363952",
+      "decimals": 8
+    }
+  ],
+  "tapesendApp": "https://www.tapesend.com"
+}

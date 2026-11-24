@@ -3,7 +3,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import { Wallet, getAddress, keccak256 } from "ethers";
+import { Contract, Wallet, getAddress, keccak256 } from "ethers";
 import { ai, chain, deployment } from "./config.ts";
 import { sign, digest, type Envelope } from "./tap13.ts";
 import { buildManifest, delegationSigner, MAX_DELEGATION, type AgentDef } from "./manifest.ts";
@@ -26,7 +26,7 @@ const signer = new Wallet(cfg.operatorKey);
 const op = writer(cfg.operatorKey);
 
 type Deployed = { slug: string; kind: "positionWatch" | "tokenRiskCheck"; circuits: string; tokenId: string; priceUsdt: string;
-  sender: { circuits: string; tokenId: string } };
+  sender?: { circuits: string; tokenId: string } };
 type Agent = Deployed & { def: AgentDef; tokenIdN: bigint; container: string; agentId: string };
 
 const defs = { positionWatch: pw.def, tokenRiskCheck: trc.def } as const;
@@ -60,12 +60,24 @@ function send(res: ServerResponse, status: number, body: unknown, headers: Recor
   res.end(typeof body === "string" ? body : JSON.stringify(body));
 }
 
-/** The owner's delegation of the signing key, valid only while the same owner holds the agent. */
+const marketRead = new Contract(cfg.market, ["function activeListingOf(bytes32) view returns (uint256)",
+  "function listingOf(uint256) view returns (tuple(bytes32 agentId, address seller, address token, uint256 price, uint64 expiresAt, bool active))"], provider);
+
+/** Who speaks for the agent: its holder, or, while Evermo's sale contract holds it in escrow, the seller who listed it. */
+async function speakerOf(a: Agent): Promise<string> {
+  const holder = getAddress(await holderOf(a.circuits, a.tokenIdN));
+  if (holder !== getAddress(cfg.market)) return holder;
+  const n: bigint = await marketRead.activeListingOf(a.agentId);
+  return n > 0n ? getAddress((await marketRead.listingOf(n - 1n)).seller) : holder;
+}
+
+/** The owner's delegation of the signing key, valid only while the same owner holds the agent (or has it listed for sale).
+ *  While listed, the agent can be seen and tried for free; paid work waits for the buyer, because the on-chain permission
+ *  follows the holder. */
 async function delegationFor(a: Agent) {
   const d = db.delegations.get(a.slug);
   if (!d || d.expires <= Date.now() / 1000) return null;
-  const holder = await holderOf(a.circuits, a.tokenIdN);
-  return getAddress(holder) === getAddress(d.holder) ? d : null;
+  return (await speakerOf(a)) === getAddress(d.holder) ? d : null;
 }
 
 async function manifestOf(a: Agent) {
@@ -95,6 +107,7 @@ async function record(a: Agent, ref: string) {
 
 /** Sends a sealed message to the agent's container over TapeSend. Returns null when the owner has no inbox key. */
 async function deliver(a: Agent, subject: string, body: string) {
+  if (!a.sender) return null; // launched without a sender identity: answers are signed and recorded, not mailed
   const k = await inboxKey(a.circuits, a.tokenIdN);
   if (!k) return null;
   const sender = await containerOf(a.sender.circuits, BigInt(a.sender.tokenId));
