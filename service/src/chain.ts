@@ -22,6 +22,9 @@ export const budgetAbi = [
   "function check(bytes32,address,address,address,uint256) view returns (bytes1 inputs, bool allowed)",
   "function pay(bytes32 agentId, address token, address payee, uint256 amount, bytes32 ref) returns (bool)",
   "function balanceOf(bytes32,address) view returns (uint256)",
+  "function payThrough(bytes32 agentId, address token, address payee, uint256 amount, bytes32 ref) returns (bool)",
+  "function deposit(bytes32 agentId, address token, uint256 amount)",
+  "event PaymentDecided(bytes32 indexed agentId, address indexed token, address indexed payee, uint256 amount, bytes1 inputs, bool allowed, bytes32 ref)",
 ];
 
 export async function containerOf(circuits: string, tokenId: bigint): Promise<{ container: string; opened: boolean }> {
@@ -41,6 +44,7 @@ export async function inboxKey(circuits: string, tokenId: bigint) {
 export function writer(operatorKey: string) {
   const w = new Wallet(operatorKey, provider);
   return {
+    wallet: w,
     address: w.address,
     registry: (a: string) => new Contract(a, registryAbi, w),
     budget: (a: string) => new Contract(a, budgetAbi, w),

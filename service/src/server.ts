@@ -15,6 +15,7 @@ import { seal, endpointID } from "./tapesend.ts";
 import * as pw from "./agents/positionWatch.ts";
 import * as trc from "./agents/tokenRiskCheck.ts";
 import { verifyAgentAt } from "./verify.ts";
+import * as x402 from "./x402.ts";
 import { Indexer } from "./indexer.ts";
 import { catalog } from "./catalog.ts";
 import { provider } from "./chain.ts";
@@ -32,6 +33,7 @@ type Agent = Deployed & { def: AgentDef; tokenIdN: bigint; container: string; ag
 const defs = { positionWatch: pw.def, tokenRiskCheck: trc.def } as const;
 const deployed: Deployed[] = JSON.parse(readFileSync(cfg.agentsFile, "utf8"));
 const registry = op.registry(cfg.registry), budget = op.budget(cfg.budget);
+const facilitator = cfg.okx ? x402.okxFacilitator(cfg.okx) : x402.localFacilitator(op.wallet, provider);
 
 const ix = new Indexer(join(cfg.dataDir, "index.db"), provider, { registry: cfg.registry, budget: cfg.budget, market: cfg.market }, cfg.deployBlock);
 const cat = catalog(provider, ix, { registry: cfg.registry, market: cfg.market });
@@ -184,6 +186,78 @@ async function call(a: Agent, req: IncomingMessage, method: string): Promise<{ e
   }
 }
 
+// ---------- x402: agents sell their answers per call, and pay other services from their budget ----------
+
+/** Anyone can pay for one answer over x402. The price goes straight to the agent's current owner. */
+async function sellX402(a: Agent, req: IncomingMessage, res: ServerResponse, method: string) {
+  const body = await readBody(req);
+  const url = `${cfg.publicUrl}/a/${a.slug}/paid/${method}`;
+  if (!a.def.methods.some((m) => m.name === method)) return send(res, 404, { error: "Not found" });
+  if (!(await delegationFor(a))) return send(res, 409, { error: "The owner has not switched this agent on yet" });
+  const owner = await speakerOf(a);
+  const reqs = x402.requirements(owner, usdtUnits(a.priceUsdt));
+  const pr: x402.PaymentRequired = { x402Version: x402.X402_VERSION, resource: { url, description: `${a.def.name}: ${method}`, mimeType: "application/json" }, accepts: [reqs] };
+  const sigHeader = req.headers["payment-signature"] as string | undefined;
+  if (!sigHeader) return send(res, 402, pr, { "PAYMENT-REQUIRED": x402.encode(pr), "access-control-expose-headers": "PAYMENT-REQUIRED, PAYMENT-RESPONSE" });
+  let payment: x402.PaymentPayload;
+  try { payment = x402.decode(sigHeader); } catch { return send(res, 402, { ...pr, error: "invalid_payment" }, { "PAYMENT-REQUIRED": x402.encode({ ...pr, error: "invalid_payment" }) }); }
+  const v = await facilitator.verify(payment, reqs);
+  if (!v.isValid) return send(res, 402, { ...pr, error: v.invalidReason ?? "invalid_payment" }, { "PAYMENT-REQUIRED": x402.encode({ ...pr, error: v.invalidReason }) });
+  // Run first, settle only when there is an answer to deliver.
+  let parsed: any; try { parsed = JSON.parse(new TextDecoder().decode(body)); } catch { parsed = {}; }
+  const id = typeof parsed.id === "string" && parsed.id.length > 0 && parsed.id.length <= 128 ? parsed.id : "x402-" + payment.payload.authorization.nonce.slice(2, 18);
+  const params = parsed.params && typeof parsed.params === "object" && !Array.isArray(parsed.params) ? parsed.params : {};
+  let out: Awaited<ReturnType<typeof run>>;
+  try { out = await run(a, method, params); }
+  catch (e: any) {
+    const f = e instanceof pw.BadInput ? new Fail("BAD_REQUEST", e.message) : e instanceof Fail ? e : new Fail("INTERNAL", "The agent could not finish this request");
+    return send(res, 200, await sign(signer, a.container, id, method, params, { ok: false, error: { code: f.code, message: f.message } })); // nothing charged
+  }
+  const settled = await facilitator.settle(payment, reqs);
+  if (!settled.success) return send(res, 402, { ...pr, error: settled.errorReason ?? "settlement_failed" }, { "PAYMENT-REQUIRED": x402.encode({ ...pr, error: settled.errorReason }) });
+  const env = await sign(signer, a.container, id, method, params, { ok: true, result: out.result });
+  const ref = digest(a.container, id, method, params, true, out.result, env.ts);
+  const work = await record(a, ref).catch(() => null); // recorded when the owner's permission is current
+  return send(res, 200, env, { "PAYMENT-RESPONSE": x402.encode(settled), "access-control-expose-headers": "PAYMENT-RESPONSE, x-evermo-record",
+    ...(work ? { "x-evermo-record": work } : {}) });
+}
+
+/** The owner has the agent buy from an x402 service. The budget circuit decides on the real seller before anything is signed. */
+async function buyX402(a: Agent, req: IncomingMessage) {
+  const b = JSON.parse(new TextDecoder().decode(await readBody(req)));
+  const id = String(b.id ?? ""), target = String(b.url ?? ""), payload = b.body ?? null;
+  const params = { url: target, body: payload };
+  const owner = ownerOfCall(req.headers[OWNER_HEADER] as string | undefined, a.agentId, id, "x402", params);
+  if (!owner || getAddress(owner) !== getAddress(await holderOf(a.circuits, a.tokenIdN))) return { ok: false, error: "Only the agent's current owner can have it pay" };
+  if (!/^https?:\/\/\S+$/.test(target)) return { ok: false, error: "Give the service's address" };
+  const init = (headers: Record<string, string> = {}): RequestInit => ({ method: "POST", headers: { "content-type": "application/json", ...headers },
+    body: JSON.stringify(payload ?? {}), signal: AbortSignal.timeout(60000), redirect: "error" });
+  const first = await fetch(target, init());
+  if (first.status !== 402) return { ok: first.ok, paid: false, status: first.status, response: await first.json().catch(() => null) };
+  const h = first.headers.get("payment-required");
+  const pr: x402.PaymentRequired = h ? x402.decode(h) : await first.json();
+  const want = x402.pick(pr);
+  if (!want) return { ok: false, error: "The service does not take USDT0 on X Layer" };
+  const nonce = "0x" + randomBytes(32).toString("hex"), amount = BigInt(want.amount);
+  // 1. The budget circuit decides, on chain, on the real seller and amount. A refusal is recorded.
+  const tx = await budget.payThrough(a.agentId, x402.USDT0, want.payTo, amount, nonce);
+  const rc = await tx.wait();
+  const decided = rc.logs.map((l: any) => { try { return budget.interface.parseLog(l); } catch { return null; } }).find((e: any) => e?.name === "PaymentDecided");
+  if (!decided?.args.allowed) return { ok: false, paid: false, refused: true, decision: tx.hash, error: "The budget rules refused this payment" };
+  // 2. Pay the seller with exactly what the budget released.
+  const payment = await x402.signPayment(op.wallet, want, pr.resource, nonce);
+  const second = await fetch(target, init({ "PAYMENT-SIGNATURE": x402.encode(payment) }));
+  const settledH = second.headers.get("payment-response");
+  if (!second.ok || !settledH) {
+    // Not delivered: the amount goes back into the agent's budget.
+    const usdt = new Contract(x402.USDT0, ["function approve(address,uint256) returns (bool)"], op.wallet);
+    await (await usdt.approve(cfg.budget, amount)).wait();
+    await (await budget.deposit(a.agentId, x402.USDT0, amount)).wait();
+    return { ok: false, paid: false, decision: tx.hash, error: "The service did not deliver; the amount went back to the budget" };
+  }
+  return { ok: true, paid: true, decision: tx.hash, settlement: x402.decode<x402.SettleResponse>(settledH), response: await second.json().catch(() => null) };
+}
+
 // ---------- MCP (tools/list, tools/call) ----------
 async function mcp(a: Agent, req: IncomingMessage) {
   const m = JSON.parse(new TextDecoder().decode(await readBody(req)));
@@ -285,6 +359,9 @@ const server = createServer(async (req, res) => {
       return send(res, 200, { ok: true });
     }
     if (req.method === "POST" && rest === "/mcp") return send(res, 200, await mcp(a, req));
+    const paid = rest.match(/^\/paid\/([A-Za-z_][A-Za-z0-9_]{0,63})$/);
+    if (req.method === "POST" && paid) return await sellX402(a, req, res, paid[1]);
+    if (req.method === "POST" && rest === "/buy-x402") return send(res, 200, await buyX402(a, req));
     if (req.method === "POST" && rest === PATH) {
       const body = await readBody(req, 1024 * 1024);
       let parsed: any; try { parsed = JSON.parse(new TextDecoder().decode(body)); } catch { parsed = null; }
@@ -312,5 +389,6 @@ const server = createServer(async (req, res) => {
   }
 });
 
+process.on("unhandledRejection", (e) => console.error("unhandled", e));
 server.listen(cfg.port, () => console.log(`Evermo agent service on :${cfg.port} (${[...agents.keys()].join(", ")})`));
 setInterval(() => void watchOnce(), cfg.watchEveryMinutes * 60_000);

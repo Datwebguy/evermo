@@ -28,5 +28,7 @@ export function deployment() {
     aiMarginBps: BigInt(opt("AI_MARGIN_BPS", "1000")),
     watchEveryMinutes: Number(opt("WATCH_EVERY_MINUTES", "10")),
     port: Number(opt("PORT", "8787")),
+    okx: process.env.OKX_API_KEY && process.env.OKX_SECRET_KEY && process.env.OKX_PASSPHRASE
+      ? { apiKey: process.env.OKX_API_KEY, secretKey: process.env.OKX_SECRET_KEY, passphrase: process.env.OKX_PASSPHRASE } : null,
   };
 }
