@@ -22,6 +22,7 @@ contract AgentBudget is ReentrancyGuard {
 
     event Deposited(bytes32 indexed agentId, address indexed token, address indexed from, uint256 amount);
     event Withdrawn(bytes32 indexed agentId, address indexed token, address indexed to, uint256 amount);
+    event Relayed(bytes32 indexed agentId, address indexed token, address indexed payee, address operator, uint256 amount, bytes32 ref);
     event PaymentDecided(bytes32 indexed agentId, address indexed token, address indexed payee, uint256 amount, bytes1 inputs, bool allowed, bytes32 ref);
 
     error NotHolder();
@@ -84,6 +85,23 @@ contract AgentBudget is ReentrancyGuard {
         nonReentrant
         returns (bool)
     {
+        return _pay(agentId, token, payee, amount, ref, payee);
+    }
+
+    /// @notice For payments the operator settles itself, such as x402: the budget circuit decides on the real payee, then
+    ///         the amount goes to the operator, who pays `payee` with it. `ref` names the settlement (for x402, the
+    ///         EIP-3009 authorization nonce), so anyone can match this decision with the transfer to `payee`.
+    function payThrough(bytes32 agentId, address token, address payee, uint256 amount, bytes32 ref)
+        external
+        nonReentrant
+        returns (bool)
+    {
+        bool ok = _pay(agentId, token, payee, amount, ref, msg.sender);
+        if (ok) emit Relayed(agentId, token, payee, msg.sender, amount, ref);
+        return ok;
+    }
+
+    function _pay(bytes32 agentId, address token, address payee, uint256 amount, bytes32 ref, address to) private returns (bool) {
         if (amount == 0) revert ZeroAmount();
         (bytes1 inputs, bool allowed) = check(agentId, msg.sender, token, payee, amount);
         if (allowed && balanceOf[agentId][token] < amount) revert InsufficientBudget();
@@ -93,7 +111,7 @@ contract AgentBudget is ReentrancyGuard {
         address holder = registry.holderOf(agentId);
         spent[agentId][holder][token][block.timestamp / 1 days] += amount;
         balanceOf[agentId][token] -= amount;
-        IERC20(token).safeTransfer(payee, amount);
+        IERC20(token).safeTransfer(to, amount);
         return true;
     }
 }

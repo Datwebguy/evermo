@@ -90,6 +90,34 @@ describe("Evermo on a local copy of X Layer", async () => {
     assert.equal((await t.registry.recordOf(agentId)).work, 1n);
   });
 
+  it("x402: the circuit decides on the real seller, then the operator settles with a USDT0 transfer authorization", async () => {
+    const token = X.usdt0, seller = t.signers[7], facilitator = t.signers[8];
+    await t.p.send("hardhat_setBalance", [facilitator.address, "0x56BC75E2D63100000"]);
+    await (await t.registry.connect(owner).setPayee(agentId, seller.address, true)).wait();
+    const nonce = "0x" + "a1".repeat(32);
+    const amount = USDT(0.5);
+    // A seller the owner never allowed: refused on chain, nothing moves.
+    const before = await t.budget.balanceOf(agentId, token);
+    assert.equal(await t.budget.connect(operator).payThrough.staticCall(agentId, token, buyer.address, amount, nonce), false);
+    // The allowed seller: the circuit checks the seller, the operator receives the amount and emits Relayed.
+    const rc = await (await t.budget.connect(operator).payThrough(agentId, token, seller.address, amount, nonce)).wait();
+    const relayed = rc!.logs.map((l: any) => { try { return t.budget.interface.parseLog(l); } catch { return null; } }).find((e: any) => e?.name === "Relayed");
+    assert.equal(relayed!.args.payee, seller.address);
+    assert.equal(relayed!.args.ref, nonce);
+    assert.equal(before - (await t.budget.balanceOf(agentId, token)), amount);
+    // The operator signs an EIP-3009 authorization (the x402 "exact" payload) and anyone, such as a facilitator, settles it.
+    const now = (await t.p.getBlock("latest"))!.timestamp;
+    const auth = { from: operator.address, to: seller.address, value: amount, validAfter: BigInt(now - 5), validBefore: BigInt(now + 600), nonce };
+    const sig = await operator.signTypedData({ name: "USD₮0", version: "1", chainId: 196, verifyingContract: token },
+      { TransferWithAuthorization: [{ name: "from", type: "address" }, { name: "to", type: "address" }, { name: "value", type: "uint256" },
+        { name: "validAfter", type: "uint256" }, { name: "validBefore", type: "uint256" }, { name: "nonce", type: "bytes32" }] }, auth);
+    const usdt = new t.ethers.Contract(token, ["function transferWithAuthorization(address,address,uint256,uint256,uint256,bytes32,bytes)",
+      "function balanceOf(address) view returns (uint256)"], facilitator);
+    const s0 = await usdt.balanceOf(seller.address);
+    await (await usdt.transferWithAuthorization(auth.from, auth.to, auth.value, auth.validAfter, auth.validBefore, auth.nonce, sig)).wait();
+    assert.equal((await usdt.balanceOf(seller.address)) - s0, amount);
+  });
+
   it("resale: royalty to the builder, permission ends for the old owner", async () => {
     await (await t.cpuAs(owner).setApprovalForAll(await t.market.getAddress(), true)).wait();
     const expires = BigInt((await t.p.getBlock("latest"))!.timestamp + 86400);
@@ -108,7 +136,7 @@ describe("Evermo on a local copy of X Layer", async () => {
     assert.equal(await t.registry.permissionValid(agentId, operator.address), false);
     // the old owner can no longer withdraw the budget; the new owner can
     await assert.rejects(t.budget.connect(owner).withdraw(agentId, X.usdt0, USDT(1), owner.address));
-    await (await t.budget.connect(buyer).withdraw(agentId, X.usdt0, USDT(8), buyer.address)).wait();
+    await (await t.budget.connect(buyer).withdraw(agentId, X.usdt0, USDT(7.5), buyer.address)).wait();
     // the track record moved with the agent
     const rec = await t.registry.recordOf(agentId);
     assert.equal(rec.sales, 2n);
