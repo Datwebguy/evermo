@@ -77,3 +77,18 @@ export async function facts(params: any) {
     sources: marketOk ? { chain: "X Layer at block " + block, market: "GeckoTerminal" } : { chain: "X Layer at block " + block },
   };
 }
+
+/** A short verdict written from the facts alone, used when the AI model is not available. */
+export function plainSummary(f: Awaited<ReturnType<typeof facts>>, lang: "en" | "zh"): string {
+  const c = f.contract, m = f.market, zh = lang === "zh";
+  const control = c.upgradeable
+    ? (zh ? "合约可升级，规则可能被更改" : "The contract can be upgraded, so its rules can change")
+    : c.owner && !c.ownerRenounced ? (zh ? "合约由一个地址控制" : "One address controls the contract")
+    : (zh ? "合约不可升级，也没有控制者" : "The contract cannot be upgraded and has no controller");
+  const usd = (v: string) => Number(v).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  const liq = m === null ? (zh ? "市场数据暂时无法获取" : "market data is not available right now")
+    : m.pools === 0 ? (zh ? "没有交易池" : "it has no trading pools")
+    : zh ? `${m.pools} 个交易池共约 $${usd(m.totalLiquidityUsd)} 流动性`
+    : `it has about $${usd(m.totalLiquidityUsd)} of liquidity in ${m.pools} pools`;
+  return zh ? `${control}；${liq}。` : `${control}; ${liq}.`;
+}

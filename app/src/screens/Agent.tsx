@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Fingerprint, Warning } from "@phosphor-icons/react";
-import { agent as loadAgent, history, live, manifest, toolsCheck, run, type AgentCard, type Item, type Manifest, type Answer } from "../service/api";
+import { agent as loadAgent, agents as loadAgents, history, live, manifest, toolsCheck, run, paidOffer, buyWithAgent, type AgentCard, type Item, type Manifest, type Answer, type PaidOffer } from "../service/api";
+import { recover } from "../../../service/src/tap13";
+import { TxLink } from "../ui/parts";
+import { type Contract } from "ethers";
 import { dep } from "../chain/deployment";
 import { short, dateOf, money } from "../chain/format";
 import { useWallet } from "../state";
@@ -34,13 +37,17 @@ export function Agent({ id }: { id: string }) {
   const [running, setRunning] = useState(false);
   const [runErr, setRunErr] = useState("");
   const [bought, setBought] = useState(false);
+  const [offer, setOffer] = useState<PaidOffer | null>(null);
+  const [mine, setMine] = useState<AgentCard[]>([]);
+  const [payer, setPayer] = useState("");
+  const [x402, setX402] = useState<{ refused?: boolean; settlement?: string; error?: string } | null>(null);
 
   const refresh = useCallback(async () => {
     const x = await loadAgent(id); setA(x);
     history(id).then(setItems).catch(() => {});
     registry().permissionOf(id).then((p: any) => setStopped(p.operator.toLowerCase() !== dep().operator.toLowerCase() || Number(p.expiresAt) <= Date.now() / 1000)).catch(() => setStopped(null));
     const mm = await manifest(x.address); setM(mm);
-    if (mm) toolsCheck(mm).then(setTools);
+    if (mm) { toolsCheck(mm).then(setTools); const meth = mm.methods.find((x) => x.name !== "receipt"); if (meth) paidOffer(mm, meth.name).then(setOffer); }
   }, [id]);
   useEffect(() => {
     refresh().catch((e) => setErr(e.message));
@@ -48,6 +55,34 @@ export function Agent({ id }: { id: string }) {
     const stop = live((it) => { if (it.agentId?.toLowerCase() !== id.toLowerCase()) return; setItems((f) => [it, ...f]); clearTimeout(t); t = setTimeout(() => loadAgent(id).then(setA), 1000); });
     return () => { stop(); clearTimeout(t); };
   }, [id, refresh]);
+
+  useEffect(() => {
+    if (!address) { setMine([]); return; }
+    loadAgents().then((l) => { const own = l.filter((x) => x.owner.toLowerCase() === address.toLowerCase() && !x.listing && x.switchedOn && x.agentId !== id); setMine(own); setPayer((p) => p || own[0]?.agentId || ""); }).catch(() => {});
+  }, [address, id]);
+
+  async function payWithMine() {
+    if (!m || !method || !a || !offer) return;
+    const my = mine.find((x) => x.agentId === payer); if (!my) return;
+    setRunning(true); setRunErr(""); setAnswer(null); setX402(null);
+    try {
+      const p: Record<string, string> = {};
+      for (const [k, t] of Object.entries(method.params)) { if (k === "lang") { p.lang = getLang(); continue; } const v = (params[k] ?? "").trim(); if (v) p[k] = v; else if (!t.endsWith("?")) throw new Error(`Enter the ${(LABEL[k] ?? k).toLowerCase()}.`); }
+      const sg = await ask(); if (!sg) return;
+      const b = await buyWithAgent(my, offer, method.name, p, (d) => sg.signMessage(d));
+      if (b.ok && b.response) {
+        let verified = false; try { verified = recover(b.response, method.name, p).toLowerCase() === m.signer.toLowerCase(); } catch { /* bad signature */ }
+        setAnswer({ env: b.response, verified, payment: { charged: (Number(offer.amount) / 1e6).toString(), allowed: true, tx: b.decision ?? null } });
+        setX402({ settlement: b.settlement?.transaction });
+      } else setX402({ refused: !!b.refused, error: b.error });
+    } catch (e: any) { setRunErr(e?.message?.startsWith("Enter") ? e.message : explain(e)); } finally { setRunning(false); }
+  }
+  async function allowSeller() {
+    const my = mine.find((x) => x.agentId === payer); if (!my || !offer) return;
+    const sg = await ask(); if (!sg) return;
+    try { await (await (registry().connect(sg) as Contract).setPayee(my.agentId, offer.payTo, true)).wait(); setX402(null); await payWithMine(); }
+    catch (e) { setRunErr(explain(e)); }
+  }
 
   const lastPay = useMemo(() => items.find((x) => x.name === "PaymentDecided"), [items]);
   const lastSale = useMemo(() => items.find((x) => x.name === "Sold"), [items]);
@@ -113,6 +148,16 @@ export function Agent({ id }: { id: string }) {
                     <button className="btn quiet" disabled={running} onClick={() => go(false)}>Run free</button>
                   </> : <button className="btn primary" disabled={running || !a.switchedOn} onClick={() => go(false)}>{running ? "Working…" : "Run it"}</button>}
                 </div>
+                {!isOwner && offer && mine.length > 0 && (
+                  <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
+                    <select className="ctl" style={{ height: 44 }} value={payer} onChange={(e) => setPayer(e.target.value)} aria-label="Pay with">
+                      {mine.map((x) => <option key={x.agentId} value={x.agentId}>{x.name ?? short(x.agentId)}</option>)}</select>
+                    <button className="btn" disabled={running} onClick={payWithMine}>Pay with my agent, {money(offer.amount, dep().tokens[0].address)}</button>
+                  </div>)}
+                {x402?.refused && <Notice tone="no">Your agent's budget rules refused this seller. <button className="btn small" style={{ marginLeft: 8 }} onClick={allowSeller}>Allow this seller and pay</button></Notice>}
+                {x402?.error && !x402.refused && <div className="error">{x402.error}</div>}
+                {x402?.settlement && <TxLink tx={x402.settlement}>Payment to its owner on the explorer</TxLink>}
+                {offer && <div className="hint">Other apps and agents can pay {money(offer.amount, dep().tokens[0].address)} per answer over x402, straight to its owner.</div>}
                 {!a.switchedOn && <div className="hint">This agent can run once its owner switches it on.</div>}
                 {running && <div className="card pad stack" style={{ boxShadow: "none" }}><Skel w="40%" /><Skel /><Skel w="80%" /><Skel w="60%" /></div>}
                 {answer && <Result a={answer} />}

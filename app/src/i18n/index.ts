@@ -14,7 +14,7 @@ const subs = new Set<() => void>();
 export const onLang = (f: () => void) => { subs.add(f); return () => subs.delete(f); };
 
 // Values carried over unchanged, in order: dates, addresses, amounts with their token, plain numbers.
-const VALUE = /(?:[A-Z][a-z]{2} \d{1,2}, \d{4})|(?:\d{4}年\d{1,2}月\d{1,2}日)|(?:0x[0-9a-fA-F]{4,}(?:…[0-9a-fA-F]{4})?)|(?:\$?\d[\d,]*(?:\.\d+)?(?: (?:USDT0|BEM|OKB))?)/g;
+const VALUE = /(?:[A-Z][a-z]{2} \d{1,2}, \d{4})|(?:\d{4}年\d{1,2}月\d{1,2}日)|(?:0x[0-9a-fA-F]{4,}(?:…[0-9a-fA-F]{4})?)|(?:(?<![A-Za-z\d])\$?\d[\d,]*(?:\.\d+)?(?: (?:USDT0|BEM|OKB))?)/g;
 
 /** Translates one piece of interface text, or returns it unchanged. */
 export function tr(text: string): string {

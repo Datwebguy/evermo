@@ -15,7 +15,7 @@ const human = (k: string) => NAMES[k] ?? k.replace(/([A-Z])/g, " $1").replace(/^
 const isAddr = (v: unknown) => typeof v === "string" && /^0x[0-9a-fA-F]{40}$/.test(v);
 const show = (k: string, v: unknown) => v === null || v === undefined ? "Not known" : v === true ? "Yes" : v === false ? "No"
   : /Usd$|^totalSupply$|^health/.test(k) && /^\d+(\.\d+)?$/.test(String(v)) ? Number(v).toLocaleString("en-US", { maximumFractionDigits: k === "healthFactor" ? 2 : 0 }) : String(v);
-const HIDE = new Set(["summary", "summaryReceipt", "sources", "largestPools", "lang"]);
+const HIDE = new Set(["summary", "summaryReceipt", "summaryBy", "sources", "largestPools", "lang"]);
 
 /** The few facts that matter most, per kind of answer. */
 function keyFacts(r: any): [string, string, "ok" | "no" | ""][] {

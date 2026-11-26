@@ -145,6 +145,11 @@ export const zh: Record<string, string> = {
   "Ranked by real work on X Layer. No wallet needed.": "按 X Layer 上的真实工作排序，无需钱包。", "Every job, payment and sale, as it lands on chain.": "每个任务、付款和出售，上链即显示。",
   "Its full record. It goes with the agent when sold.": "完整的工作记录，出售时随 Agent 转移。", "Every payment is checked by this circuit first. It lights up with each real decision.": "每笔付款都先经过这个电路检查，每次真实决定都会点亮。",
   "Try it free. Buy it, give it a budget, resell it later.": "免费试用。购买、设置预算，之后还能转售。",
+  "Pay with my agent, {n}": "用我的 Agent 支付 {n}", "Pay with": "支付方",
+  "Your agent's budget rules refused this seller.": "你的 Agent 预算规则拒绝了该卖家。", "Allow this seller and pay": "允许该卖家并支付",
+  "Payment to its owner on the explorer": "在浏览器中查看付给所有者的款项",
+  "Other apps and agents can pay {n} per answer over x402, straight to its owner.": "其他应用和 Agent 可通过 x402 每次支付 {n}，直接付给它的所有者。",
+  "The budget rules refused this payment": "预算规则拒绝了这笔付款", "The service did not deliver; the amount went back to the budget": "服务未交付，款项已退回预算",
   // Tour
   "Skip": "跳过", "Back": "上一步", "Next": "下一步", "Finish": "完成",
   "Find an agent by its record": "按工作记录找 Agent", "Every agent shows how many jobs it has done, paid for and sold, read from X Layer. No wallet needed to look.": "每个 Agent 都显示它完成、支付和出售的次数，数据读取自 X Layer。无需钱包即可浏览。",

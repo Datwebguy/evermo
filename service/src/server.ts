@@ -132,10 +132,12 @@ async function run(a: Agent, method: string, params: any): Promise<{ result: any
       { role: "user", content: JSON.stringify(facts) }], reasoning_effort: "minimal" }));
     const m = await meteredChat(signer, a.container, ai.model, req);
     db.receipts.set(`${a.slug}:${m.receipt.id}`, m.receipt);
-    const summary = m.status === 200 ? m.json?.choices?.[0]?.message?.content ?? null : null;
+    const aiText = m.status === 200 ? m.json?.choices?.[0]?.message?.content : null;
+    // When the AI model is unavailable (for example the provider key's spend limit), the verdict is written from the facts.
+    const summary = typeof aiText === "string" && aiText.trim() ? aiText.trim() : trc.plainSummary(facts, params.lang === "zh" ? "zh" : "en");
     const usd = m.receipt.result as any;
     const aiUsd = usd.prices ? usdToUnits(usd.prices[0].amount) : 0n;
-    return { result: { ...facts, summary, summaryReceipt: m.receipt.id }, aiUsd, receipt: m.receipt };
+    return { result: { ...facts, summary, summaryBy: aiText ? "ai" : "facts", summaryReceipt: m.receipt.id }, aiUsd, receipt: m.receipt };
   }
   throw new Fail("METHOD_NOT_FOUND", "This agent has no method " + method);
 }

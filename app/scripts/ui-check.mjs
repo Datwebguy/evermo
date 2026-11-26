@@ -137,6 +137,7 @@ try {
   await v.fill("input[placeholder='0x…']", "0x779Ded0c9e1022225f8E0630b35a9b54bE713736");
   await v.click("text=Run it"); await v.waitForSelector("text=Signed by this agent", { timeout: 120000 }); await settle(v);
   ok("visitor gets a signed answer from Token Risk Check", true); await shot(v, "try-token-check");
+  ok("visitor sees the agent's own x402 price per answer", await v.locator("text=/per answer over x402/").count() > 0);
   await v.close();
 
   // Owner A lists Position Watch for 20 USDT0

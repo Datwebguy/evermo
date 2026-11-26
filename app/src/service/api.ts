@@ -83,3 +83,26 @@ export async function watch(address: string, agentId: string, account: string, w
 export async function checkOutside(url: string) {
   return get<{ ok: boolean; problems: string[]; name: string | null; circuits: string | null; tokenId: string | null }>(`/check-agent?url=${encodeURIComponent(url)}`);
 }
+
+// ---- x402 ----
+export type PaidOffer = { url: string; amount: string; payTo: string };
+/** What an answer costs over x402, as the agent itself states it (its 402 reply). */
+export async function paidOffer(m: Manifest, method: string): Promise<PaidOffer | null> {
+  const url = `${m.endpoints.live[0]}/paid/${method}`;
+  try {
+    const r = await fetch(url, { method: "POST", body: "{}" });
+    if (r.status !== 402) return null;
+    const pr = JSON.parse(atob(r.headers.get("payment-required") ?? ""));
+    const a = pr.accepts?.find((x: any) => x.scheme === "exact" && x.network === "eip155:196");
+    return a ? { url, amount: a.amount, payTo: a.payTo } : null;
+  } catch { return null; }
+}
+
+export type Bought = { ok: boolean; paid?: boolean; refused?: boolean; error?: string; decision?: string; settlement?: { transaction: string }; response?: any };
+/** The owner has one of their agents pay for this agent's answer, from its budget. */
+export async function buyWithAgent(mine: AgentCard, offer: PaidOffer, method: string, params: Record<string, unknown>, sign: (d: Uint8Array) => Promise<string>): Promise<Bought> {
+  const id = newId(), body = { id, method, params }, p = { url: offer.url, body }, ts = Math.floor(Date.now() / 1000);
+  const sig = await sign(getBytes(ownerDigest(mine.agentId, id, "x402", p, ts)));
+  const r = await fetch(mine.address.replace(/\/$/, "") + "/buy-x402", { method: "POST", headers: { [OWNER_HEADER]: `${ts}.${sig}` }, body: JSON.stringify({ id, ...p }) });
+  return r.json();
+}
